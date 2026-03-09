@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>Gayatri Accounts</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getDatabase, ref, onValue, set, push, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+  const firebaseConfig = {
+    apiKey: "AIzaSyBK8p-lRmx1TfU2fx_Hed7ioUKieJKwLII",
+    authDomain: "gayatri-jewellers-v2.firebaseapp.com",
+    databaseURL: "https://gayatri-jewellers-v2-default-rtdb.firebaseio.com",
+    projectId: "gayatri-jewellers-v2",
+    storageBucket: "gayatri-jewellers-v2.firebasestorage.app",
+    messagingSenderId: "919249152249",
+    appId: "1:919249152249:web:16e64c5cc08a2f709e5a28"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  window._db=db; window._ref=ref; window._onValue=onValue;
+  window._set=set; window._push=push; window._remove=remove;
+  document.dispatchEvent(new Event('firebase-ready'));
+</script>
+
+<style>
+:root{
+  --gold:#B8960C;--gold2:#C9A84C;--gold3:#E2C97E;--gold-bg:#FAF6E9;
+  --gold-border:#E5D48A;--cream:#FDFAF3;--cream2:#F5F0E4;
+  --dark:#1A1714;--brown:#3D2E14;--mid:#6B5A38;--muted:#9C8E72;
+  --white:#FFFFFF;--border:#EDE6D0;--bg:#F5F0E4;
+  --red:#C0392B;--green:#25A244;--blue:#2471A3;
+  --shadow:0 1px 4px rgba(0,0,0,0.06);--shadow2:0 4px 20px rgba(0,0,0,0.10);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--dark);max-width:480px;margin:0 auto;display:flex;flex-direction:column;}
+
+/* LOADING */
+#loading{position:fixed;inset:0;background:var(--cream);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:14px;}
+.load-ring{width:52px;height:52px;border-radius:50%;border:3px solid var(--cream2);border-top-color:var(--gold2);animation:spin .9s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.load-name{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold2);}
+.load-sub{font-size:11px;color:var(--muted);letter-spacing:2px;}
+
+/* LOGIN */
+#login-screen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:var(--cream);}
+.login-logo{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#9A7B0A,#C9A84C);display:flex;align-items:center;justify-content:center;font-size:30px;color:#fff;margin:0 auto 16px;box-shadow:0 8px 24px rgba(180,140,20,.30);}
+.login-brand{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:var(--dark);text-align:center;margin-bottom:2px;}
+.login-sub{font-size:10px;color:var(--gold2);letter-spacing:3px;text-align:center;margin-bottom:8px;}
+.login-tag{font-size:11px;color:var(--muted);text-align:center;margin-bottom:28px;}
+.login-card{background:#fff;border:1px solid var(--border);border-radius:20px;padding:28px 22px;width:100%;max-width:340px;box-shadow:var(--shadow2);}
+.lbl{font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;display:block;}
+.linput{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:13px;font-size:20px;font-family:monospace;letter-spacing:8px;text-align:center;outline:none;background:var(--cream);transition:border .2s;}
+.linput:focus{border-color:var(--gold2);}
+.lerr{font-size:12px;color:var(--red);text-align:center;margin-top:8px;min-height:18px;}
+.lbtn{width:100%;background:linear-gradient(135deg,#9A7B0A,#C9A84C);color:#fff;border:none;border-radius:10px;padding:14px;font-size:14px;font-weight:600;letter-spacing:1px;cursor:pointer;margin-top:14px;font-family:'DM Sans',sans-serif;}
+
+/* APP SHELL */
+#app-shell{display:none;flex-direction:column;height:100vh;overflow:hidden;}
+
+/* TOP BAR */
+.top-bar{background:#fff;border-bottom:1px solid var(--border);padding:8px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.tb-brand-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;color:var(--dark);line-height:1.1;}
+.tb-brand-sub{font-size:9px;color:var(--muted);letter-spacing:2px;}
+.tb-date{font-size:9px;color:var(--gold2);letter-spacing:.5px;font-weight:600;margin-top:2px;}
+.tb-right{display:flex;gap:8px;align-items:center;}
+.settings-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:13px;cursor:pointer;color:var(--muted);}
+.exit-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif;}
+
+/* SCROLL */
+.main-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--bg);}
+
+/* SCREENS */
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* BOTTOM NAV */
+.bottom-nav{background:#fff;border-top:1px solid var(--border);display:flex;flex-shrink:0;}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 2px;background:none;border:none;cursor:pointer;color:var(--muted);gap:2px;font-family:'DM Sans',sans-serif;transition:color .15s;position:relative;}
+.nav-btn.active{color:var(--gold2);}
+.nav-btn.active::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:24px;height:2px;background:var(--gold2);border-radius:0 0 3px 3px;}
+.nav-icon{font-size:18px;line-height:1;}
+.nav-label{font-size:9px;font-weight:500;letter-spacing:.2px;}
+
+/* PAGE HEADER */
+.page-hdr{padding:14px 16px 10px;background:#fff;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-end;}
+.page-hdr-left .page-hdr-label{font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+.page-hdr-left .page-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:var(--dark);margin-top:2px;}
+.add-btn{background:linear-gradient(135deg,#9A7B0A,#C9A84C);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+
+/* CARDS */
+.card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow);}
+.scr-pad{padding:12px 14px;}
+
+/* DASHBOARD */
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.dash-stat{background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px 12px;box-shadow:var(--shadow);}
+.dash-stat.full{grid-column:1/-1;}
+.dash-stat.gold-bg{background:linear-gradient(135deg,#9A7B0A,#C9A84C);border-color:transparent;}
+.dash-stat.gold-bg .ds-label,.dash-stat.gold-bg .ds-sub{color:rgba(255,255,255,0.8);}
+.dash-stat.gold-bg .ds-val{color:#fff;}
+.dash-stat.green-bg{background:linear-gradient(135deg,#1a7a3c,#25A244);border-color:transparent;}
+.dash-stat.green-bg .ds-label,.dash-stat.green-bg .ds-sub{color:rgba(255,255,255,0.8);}
+.dash-stat.green-bg .ds-val{color:#fff;}
+.ds-icon{font-size:20px;margin-bottom:6px;}
+.ds-label{font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;}
+.ds-val{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--dark);line-height:1.1;}
+.ds-sub{font-size:10px;color:var(--muted);margin-top:3px;}
+
+/* GOLD BALANCE BAR */
+.gold-bar{background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:14px;padding:14px 16px;margin-bottom:10px;}
+.gold-bar-title{font-size:10px;color:var(--gold2);letter-spacing:2px;text-transform:uppercase;font-weight:600;margin-bottom:10px;}
+.gold-bar-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.gold-bar-label{font-size:12px;color:var(--mid);}
+.gold-bar-val{font-size:13px;font-weight:700;color:var(--dark);}
+.gold-bar-val.green{color:var(--green);}
+.gold-bar-val.red{color:var(--red);}
+.gold-bar-divider{border:none;border-top:1px solid var(--gold-border);margin:8px 0;}
+.gold-bal-big{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:700;color:var(--gold2);}
+
+/* ENTRY LIST */
+.entry-row{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:flex-start;}
+.er-left{}
+.er-type{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:2px;}
+.er-type.in{color:var(--green);}
+.er-type.out{color:var(--red);}
+.er-type.neutral{color:var(--gold2);}
+.er-desc{font-size:13px;font-weight:600;color:var(--dark);margin-bottom:2px;}
+.er-sub{font-size:11px;color:var(--muted);}
+.er-right{text-align:right;}
+.er-amount{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;}
+.er-amount.in{color:var(--green);}
+.er-amount.out{color:var(--red);}
+.er-date{font-size:10px;color:var(--muted);margin-top:2px;}
+.er-del{background:none;border:1px solid #FECACA;color:var(--red);border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;margin-top:4px;font-family:'DM Sans',sans-serif;}
+
+/* BALANCE BAR */
+.balance-bar{background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:12px;padding:12px 16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
+.bb-label{font-size:11px;color:var(--mid);font-weight:600;}
+.bb-val{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:var(--gold2);}
+
+/* PARTY CARD */
+.party-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:transform .1s;}
+.party-card:active{transform:scale(.98);}
+.pc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;}
+.pc-name{font-size:14px;font-weight:700;color:var(--dark);}
+.pc-type{font-size:10px;color:var(--muted);background:var(--cream2);border-radius:20px;padding:2px 8px;font-weight:600;}
+.pc-bal{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;}
+.pc-bal.dr{color:var(--red);}
+.pc-bal.cr{color:var(--green);}
+.pc-bal.zero{color:var(--muted);}
+.pc-sub{font-size:11px;color:var(--muted);}
+
+/* REPORTS */
+.r-stat{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+.rs-label{font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;}
+.rs-val{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--dark);}
+.rs-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.rs-icon{font-size:28px;}
+.r-section{font-size:10px;color:var(--gold2);letter-spacing:2px;text-transform:uppercase;font-weight:700;padding:12px 0 6px;}
+.pl-row{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-radius:8px;margin-bottom:4px;}
+.pl-row.income{background:#F0FFF4;}
+.pl-row.expense{background:#FFF5F5;}
+.pl-row.profit{background:var(--gold-bg);border:1px solid var(--gold-border);}
+.pl-row.loss{background:#FFF5F5;border:1px solid #FECACA;}
+.pl-label{font-size:13px;font-weight:600;color:var(--dark);}
+.pl-val{font-size:14px;font-weight:700;}
+.pl-val.income{color:var(--green);}
+.pl-val.expense{color:var(--red);}
+.pl-val.profit{color:var(--gold2);}
+.pl-val.loss{color:var(--red);}
+.period-btns{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.period-btn{background:#fff;border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif;}
+.period-btn.active{background:var(--gold2);color:#fff;border-color:var(--gold2);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:flex;align-items:flex-end;justify-content:center;}
+.modal-overlay.hidden{display:none;}
+.modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;padding:20px 18px 32px;}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--dark);}
+.modal-close{background:none;border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:16px;cursor:pointer;color:var(--muted);}
+.form-row{margin-bottom:14px;}
+.form-label{font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;display:block;}
+.form-input{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:11px 13px;font-size:14px;outline:none;background:var(--cream);font-family:'DM Sans',sans-serif;color:var(--dark);}
+.form-input:focus{border-color:var(--gold2);}
+.form-select{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:11px 13px;font-size:14px;outline:none;background:var(--cream);font-family:'DM Sans',sans-serif;color:var(--dark);appearance:none;}
+.form-select:focus{border-color:var(--gold2);}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.calc-info{background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--mid);margin-bottom:14px;}
+.calc-info strong{color:var(--gold2);}
+.submit-btn{width:100%;background:linear-gradient(135deg,#9A7B0A,#C9A84C);color:#fff;border:none;border-radius:10px;padding:14px;font-size:14px;font-weight:600;cursor:pointer;margin-top:6px;font-family:'DM Sans',sans-serif;}
+.submit-btn.danger{background:linear-gradient(135deg,#C0392B,#E74C3C);}
+
+/* PARTY DETAIL */
+#party-detail-screen{display:none;}
+#party-detail-screen.active{display:block;}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);}
+.empty-icon{font-size:36px;margin-bottom:10px;}
+.empty-text{font-size:13px;}
+
+/* SETTINGS MODAL */
+.settings-section{margin-bottom:18px;}
+.settings-title{font-size:11px;color:var(--gold2);letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:10px;}
+
+/* ALERT */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;border-radius:10px;padding:10px 20px;font-size:13px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;}
+
+/* SYNC BADGE */
+.sync-badge{font-size:9px;background:var(--gold-bg);color:var(--gold2);border:1px solid var(--gold-border);border-radius:20px;padding:2px 8px;font-weight:700;letter-spacing:.5px;}
+
+/* FILTER ROW */
+.filter-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:10px;scrollbar-width:none;}
+.filter-row::-webkit-scrollbar{display:none;}
+.filter-chip{background:#fff;border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.filter-chip.active{background:var(--gold2);color:#fff;border-color:var(--gold2);}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading">
+  <div class="load-ring"></div>
+  <div class="load-name">Gayatri Accounts</div>
+  <div class="load-sub">LOADING YOUR BOOKS</div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-logo">📒</div>
+  <div class="login-brand">Gayatri Accounts</div>
+  <div class="login-sub">ACCOUNTS & GOLD LEDGER</div>
+  <div class="login-tag">Owner access only · Synced with Firebase</div>
+  <div class="login-card">
+    <label class="lbl">Enter PIN</label>
+    <input class="linput" id="pin-input" type="password" inputmode="numeric" maxlength="6" placeholder="••••"/>
+    <div class="lerr" id="pin-err"></div>
+    <button class="lbtn" onclick="doLogin()">UNLOCK →</button>
+  </div>
+</div>
+
+<!-- APP SHELL -->
+<div id="app-shell">
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="tb-brand-name">Gayatri Accounts</div>
+      <div class="tb-brand-sub">GOLD & ACCOUNTS LEDGER</div>
+      <div class="tb-date" id="tb-date"></div>
+    </div>
+    <div class="tb-right">
+      <button class="settings-btn" onclick="openSettings()">⚙️</button>
+      <button class="exit-btn" onclick="doLogout()">Exit</button>
+    </div>
+  </div>
+
+  <!-- MAIN SCROLL -->
+  <div class="main-scroll">
+
+    <!-- DASHBOARD SCREEN -->
+    <div class="screen active" id="screen-dashboard">
+      <div class="scr-pad" id="dashboard-content"></div>
+    </div>
+
+    <!-- GOLD SCREEN -->
+    <div class="screen" id="screen-gold">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <div class="page-hdr-label">Pure Gold Tracking</div>
+          <div class="page-title">Gold Book</div>
+        </div>
+        <button class="add-btn" onclick="openGoldModal()">+ Entry</button>
+      </div>
+      <div class="scr-pad" id="gold-content"></div>
+    </div>
+
+    <!-- CASH SCREEN -->
+    <div class="screen" id="screen-cash">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <div class="page-hdr-label">Daily Accounts</div>
+          <div class="page-title">Cash Book</div>
+        </div>
+        <button class="add-btn" onclick="openCashModal()">+ Entry</button>
+      </div>
+      <div class="scr-pad" id="cash-content"></div>
+    </div>
+
+    <!-- PARTIES SCREEN -->
+    <div class="screen" id="screen-parties">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <div class="page-hdr-label">Customer & Supplier</div>
+          <div class="page-title">Parties</div>
+        </div>
+        <button class="add-btn" onclick="openPartyModal()">+ Party</button>
+      </div>
+      <div class="scr-pad" id="parties-content"></div>
+    </div>
+
+    <!-- PARTY DETAIL SCREEN -->
+    <div class="screen" id="screen-party-detail">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <div class="page-hdr-label" id="pdl-type-label">Ledger</div>
+          <div class="page-title" id="pdl-title">Party Name</div>
+        </div>
+        <button class="add-btn" onclick="openPartyTxnModal()">+ Txn</button>
+      </div>
+      <div class="scr-pad" id="party-detail-content"></div>
+    </div>
+
+    <!-- REPORTS SCREEN -->
+    <div class="screen" id="screen-reports">
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <div class="page-hdr-label">Business Overview</div>
+          <div class="page-title">Reports</div>
+        </div>
+      </div>
+      <div class="scr-pad" id="reports-content"></div>
+    </div>
+
+  </div><!-- /main-scroll -->
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <button class="nav-btn active" id="nav-dashboard" onclick="showScreen('dashboard')">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Dashboard</span>
+    </button>
+    <button class="nav-btn" id="nav-gold" onclick="showScreen('gold')">
+      <span class="nav-icon">🪙</span>
+      <span class="nav-label">Gold Book</span>
+    </button>
+    <button class="nav-btn" id="nav-cash" onclick="showScreen('cash')">
+      <span class="nav-icon">💵</span>
+      <span class="nav-label">Cash Book</span>
+    </button>
+    <button class="nav-btn" id="nav-parties" onclick="showScreen('parties')">
+      <span class="nav-icon">👥</span>
+      <span class="nav-label">Parties</span>
+    </button>
+    <button class="nav-btn" id="nav-reports" onclick="showScreen('reports')">
+      <span class="nav-icon">📊</span>
+      <span class="nav-label">Reports</span>
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════ MODALS ══════════════ -->
+
+<!-- GOLD ENTRY MODAL -->
+<div class="modal-overlay hidden" id="gold-modal-overlay" onclick="closeGoldModal(event)">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="gold-modal-title">New Gold Entry</div>
+      <button class="modal-close" onclick="closeGoldModal()">✕</button>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Date</label>
+      <input class="form-input" type="date" id="g-date"/>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Transaction Type</label>
+      <select class="form-select" id="g-type" onchange="updateGoldTypeUI()">
+        <option value="purchase">🟢 Purchase (Gold In)</option>
+        <option value="karigar_out">🔴 Given to Karigar (Gold Out)</option>
+        <option value="karigar_in">🟢 Received from Karigar (Gold In)</option>
+        <option value="exchange_in">🟢 Old Gold Bought (Exchange In)</option>
+        <option value="lender_given">🔴 Given to Lender / Bank</option>
+        <option value="lender_return">🟢 Returned from Lender</option>
+        <option value="other_in">🟢 Other Gold In</option>
+        <option value="other_out">🔴 Other Gold Out</option>
+      </select>
+    </div>
+    <div class="form-row-2">
+      <div>
+        <label class="form-label">Purity</label>
+        <select class="form-select" id="g-purity" onchange="calcPure24k()">
+          <option value="24">24K (Pure)</option>
+          <option value="22" selected>22K</option>
+          <option value="20">20K</option>
+          <option value="18">18K</option>
+          <option value="14">14K</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Karat (if custom)</label>
+        <input class="form-input" type="number" id="g-custom-karat" placeholder="e.g. 21" min="1" max="24" oninput="calcPure24k()"/>
+      </div>
+    </div>
+    <div class="form-row-2">
+      <div>
+        <label class="form-label">Actual Weight (g)</label>
+        <input class="form-input" type="number" id="g-weight" placeholder="0.000" step="0.001" oninput="calcPure24k()"/>
+      </div>
+      <div>
+        <label class="form-label">24K Pure Gold (g)</label>
+        <input class="form-input" type="number" id="g-pure" placeholder="auto" step="0.001" style="background:var(--gold-bg);color:var(--gold2);font-weight:700;"/>
+      </div>
+    </div>
+    <div class="form-row-2" id="g-rate-row">
+      <div>
+        <label class="form-label">Rate/g (₹)</label>
+        <input class="form-input" type="number" id="g-rate" placeholder="0" oninput="calcGoldValue()"/>
+      </div>
+      <div>
+        <label class="form-label">Total Value (₹)</label>
+        <input class="form-input" type="number" id="g-value" placeholder="auto" style="background:var(--gold-bg);color:var(--gold2);font-weight:700;"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Party Name (Karigar / Supplier / etc.)</label>
+      <input class="form-input" type="text" id="g-party" placeholder="Name of party"/>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Notes / Description</label>
+      <input class="form-input" type="text" id="g-notes" placeholder="Optional notes"/>
+    </div>
+    <button class="submit-btn" onclick="saveGoldEntry()">Save Gold Entry</button>
+  </div>
+</div>
+
+<!-- CASH ENTRY MODAL -->
+<div class="modal-overlay hidden" id="cash-modal-overlay" onclick="closeCashModal(event)">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title">New Cash Entry</div>
+      <button class="modal-close" onclick="closeCashModal()">✕</button>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Date</label>
+      <input class="form-input" type="date" id="c-date"/>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Type</label>
+      <select class="form-select" id="c-type" onchange="updateCashCatUI()">
+        <option value="in">🟢 Cash In (Money Received)</option>
+        <option value="out">🔴 Cash Out (Money Spent)</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Category</label>
+      <select class="form-select" id="c-cat">
+        <option value="sale">Sale</option>
+        <option value="gold_sale">Gold Sale</option>
+        <option value="capital">Capital Invested</option>
+        <option value="loan_in">Loan Received</option>
+        <option value="other_in">Other Income</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Amount (₹)</label>
+      <input class="form-input" type="number" id="c-amount" placeholder="0"/>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Description</label>
+      <input class="form-input" type="text" id="c-desc" placeholder="What is this entry for?"/>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Party (optional)</label>
+      <input class="form-input" type="text" id="c-party" placeholder="Customer / Supplier name"/>
+    </div>
+    <button class="submit-btn" onclick="saveCashEntry()">Save Cash Entry</button>
+  </div>
+</div>
+
+<!-- PARTY MODAL -->
+<div class="modal-overlay hidden" id="party-modal-overlay" onclick="closePartyModal(event)">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title">Add Party</div>
+      <button class="modal-close" onclick="closePartyModal()">✕</button>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Party Name</label>
+      <input class="form-input" type="text" id="p-name" placeholder="Full name"/>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Party Type</label>
+      <select class="form-select" id="p-type">
+        <option value="Customer">Customer</option>
+        <option value="Supplier">Supplier</option>
+        <option value="Karigar">Karigar (Artisan)</option>
+        <option value="Lender">Lender / Bank</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Phone (optional)</label>
+      <input class="form-input" type="tel" id="p-phone" placeholder="Mobile number"/>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Opening Balance (₹)</label>
+      <input class="form-input" type="number" id="p-opening" placeholder="0 if new"/>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Opening Balance Type</label>
+      <select class="form-select" id="p-opening-type">
+        <option value="dr">They owe you (Debit / Receivable)</option>
+        <option value="cr">You owe them (Credit / Payable)</option>
+      </select>
+    </div>
+    <button class="submit-btn" onclick="saveParty()">Add Party</button>
+  </div>
+</div>
+
+<!-- PARTY TRANSACTION MODAL -->
+<div class="modal-overlay hidden" id="party-txn-modal-overlay" onclick="closePartyTxnModal(event)">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title">Add Transaction</div>
+      <button class="modal-close" onclick="closePartyTxnModal()">✕</button>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Date</label>
+      <input class="form-input" type="date" id="pt-date"/>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Type</label>
+      <select class="form-select" id="pt-type">
+        <option value="credit_sale">Credit Sale (they owe you)</option>
+        <option value="payment_received">Payment Received (they paid you)</option>
+        <option value="credit_purchase">Credit Purchase (you owe them)</option>
+        <option value="payment_made">Payment Made (you paid them)</option>
+        <option value="debit">Other Debit</option>
+        <option value="credit">Other Credit</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Amount (₹)</label>
+      <input class="form-input" type="number" id="pt-amount" placeholder="0"/>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Description</label>
+      <input class="form-input" type="text" id="pt-desc" placeholder="Details of transaction"/>
+    </div>
+    <button class="submit-btn" onclick="savePartyTxn()">Save Transaction</button>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay hidden" id="settings-modal-overlay" onclick="closeSettings(event)">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title">Settings</div>
+      <button class="modal-close" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="settings-section">
+      <div class="settings-title">Cash Opening Balance</div>
+      <div class="form-row">
+        <label class="form-label">Opening Cash (₹)</label>
+        <input class="form-input" type="number" id="s-opening-cash" placeholder="0"/>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Opening Date</label>
+        <input class="form-input" type="date" id="s-opening-date"/>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-title">Change PIN</div>
+      <div class="form-row">
+        <label class="form-label">Current PIN</label>
+        <input class="form-input" type="password" id="s-old-pin" inputmode="numeric" placeholder="Current PIN"/>
+      </div>
+      <div class="form-row">
+        <label class="form-label">New PIN</label>
+        <input class="form-input" type="password" id="s-new-pin" inputmode="numeric" placeholder="New PIN"/>
+      </div>
+      <div class="lerr" id="s-pin-err"></div>
+    </div>
+    <button class="submit-btn" onclick="saveSettings()">Save Settings</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══ STATE ══
+let goldEntries={}, cashEntries={}, parties={}, partyTxns={}, sales={}, rates={};
+let acctSettings={pin:'1234', cashOpening:0, cashOpeningDate:''};
+let currentScreen='dashboard', currentPartyId=null;
+let goldFilter='all', cashFilter='all';
+
+// ══ HELPERS ══
+function inr(n){return '₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:0});}
+function fmt(n){return Number(n||0).toFixed(3);}
+function today(){return new Date().toISOString().split('T')[0];}
+function fmtDate(d){try{return new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});}catch{return d;}}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+function pure24k(weight,karat){return (parseFloat(weight)||0)*((parseFloat(karat)||22)/24);}
+
+// ══ FIREBASE INIT ══
+function initFirebase(){
+  const db=window._db, r=window._ref, ov=window._onValue;
+  ov(r(db,'acct_settings'),snap=>{acctSettings={pin:'1234',cashOpening:0,cashOpeningDate:'',...(snap.val()||{})};});
+  ov(r(db,'gold_entries'),snap=>{goldEntries=snap.val()||{};renderCurrentScreen();});
+  ov(r(db,'cash_entries'),snap=>{cashEntries=snap.val()||{};renderCurrentScreen();});
+  ov(r(db,'parties'),snap=>{parties=snap.val()||{};renderCurrentScreen();});
+  ov(r(db,'party_txns'),snap=>{partyTxns=snap.val()||{};renderCurrentScreen();});
+  ov(r(db,'sales'),snap=>{sales=snap.val()||{};renderCurrentScreen();});
+  ov(r(db,'rates'),snap=>{rates=snap.val()||{};renderCurrentScreen();});
+}
+
+// ══ LOGIN ══
+function doLogin(){
+  const pin=document.getElementById('pin-input').value.trim();
+  if(pin===acctSettings.pin){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app-shell').style.display='flex';
+    renderCurrentScreen();
+    document.getElementById('tb-date').textContent=new Date().toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  } else {
+    document.getElementById('pin-err').textContent='Wrong PIN. Try again.';
+    setTimeout(()=>document.getElementById('pin-err').textContent='',2000);
+  }
+}
+function doLogout(){
+  document.getElementById('app-shell').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('pin-input').value='';
+}
+document.getElementById('pin-input').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+// ══ NAVIGATION ══
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const scr=document.getElementById('screen-'+name);
+  if(scr){scr.classList.add('active');}
+  const nb=document.getElementById('nav-'+name);
+  if(nb){nb.classList.add('active');}
+  currentScreen=name;
+  renderScreen(name);
+}
+function renderCurrentScreen(){renderScreen(currentScreen);}
+function renderScreen(name){
+  if(name==='dashboard')renderDashboard();
+  else if(name==='gold')renderGold();
+  else if(name==='cash')renderCash();
+  else if(name==='parties')renderParties();
+  else if(name==='party-detail')renderPartyDetail();
+  else if(name==='reports')renderReports();
+}
+
+// ══ GOLD CALCULATIONS ══
+function getGoldBalance(){
+  let inGold=0, outGold=0;
+  const IN_TYPES=['purchase','karigar_in','exchange_in','lender_return','other_in'];
+  const OUT_TYPES=['karigar_out','lender_given','other_out'];
+  Object.values(goldEntries).forEach(e=>{
+    const p=parseFloat(e.pure24k)||0;
+    if(IN_TYPES.includes(e.type)) inGold+=p;
+    else if(OUT_TYPES.includes(e.type)) outGold+=p;
+  });
+  // Also deduct from sales (gold sold = items sold from shop)
+  // We count sales as gold out (auto from Gayatri app)
+  let soldGold=0;
+  Object.values(sales).forEach(s=>{
+    (s.items||[]).forEach(it=>{
+      const gw=parseFloat(it.gw)||0;
+      // Assume sold items were 22K by default
+      soldGold+=pure24k(gw,22);
+    });
+  });
+  return {inGold, outGold, soldGold, balance: inGold - outGold - soldGold};
+}
+
+// ══ CASH CALCULATIONS ══
+function getCashBalance(){
+  let totalIn=0, totalOut=0;
+  const opening=parseFloat(acctSettings.cashOpening)||0;
+  Object.values(cashEntries).forEach(e=>{
+    const amt=parseFloat(e.amount)||0;
+    if(e.type==='in') totalIn+=amt;
+    else totalOut+=amt;
+  });
+  // Also add sales revenue automatically
+  let salesRevenue=0;
+  Object.values(sales).forEach(s=>salesRevenue+=parseFloat(s.total)||0);
+  return {opening, totalIn, totalOut, salesRevenue, balance: opening + totalIn + salesRevenue - totalOut};
+}
+
+// ══ EXPENSE CALCULATIONS ══
+function getExpenses(period){
+  const now=new Date();
+  const expenses={};
+  Object.values(cashEntries).filter(e=>e.type==='out').forEach(e=>{
+    if(!inPeriod(e.date,period)) return;
+    const cat=e.category||'Other';
+    expenses[cat]=(expenses[cat]||0)+(parseFloat(e.amount)||0);
+  });
+  return expenses;
+}
+
+function inPeriod(dateStr,period){
+  if(!period||period==='all') return true;
+  const d=new Date(dateStr); const now=new Date();
+  if(period==='today'){const t=new Date();return d.toDateString()===t.toDateString();}
+  if(period==='week'){const w=new Date(now);w.setDate(now.getDate()-7);return d>=w;}
+  if(period==='month'){return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}
+  if(period==='year'){return d.getFullYear()===now.getFullYear();}
+  return true;
+}
+
+// ══ PARTY BALANCE ══
+function getPartyBalance(partyId){
+  const p=parties[partyId];
+  if(!p) return 0;
+  let bal=(parseFloat(p.openingBalance)||0)*(p.openingType==='cr'?-1:1);
+  Object.values(partyTxns).filter(t=>t.partyId===partyId).forEach(t=>{
+    const amt=parseFloat(t.amount)||0;
+    if(t.type==='credit_sale'||t.type==='debit') bal+=amt;
+    else if(t.type==='payment_received'||t.type==='credit') bal-=amt;
+    else if(t.type==='credit_purchase') bal-=amt;
+    else if(t.type==='payment_made') bal+=amt;
+  });
+  return bal;
+}
+
+// ══ DASHBOARD ══
+function renderDashboard(){
+  const goldBal=getGoldBalance();
+  const cashBal=getCashBalance();
+  const salesArr=Object.values(sales);
+  const totalRevenue=salesArr.reduce((a,s)=>a+(parseFloat(s.total)||0),0);
+  const todaySales=salesArr.filter(s=>inPeriod(s.date,'today')).reduce((a,s)=>a+(parseFloat(s.total)||0),0);
+  const monthSales=salesArr.filter(s=>inPeriod(s.date,'month')).reduce((a,s)=>a+(parseFloat(s.total)||0),0);
+  const totalExpenses=Object.values(cashEntries).filter(e=>e.type==='out').reduce((a,e)=>a+(parseFloat(e.amount)||0),0);
+  const netProfit=totalRevenue-totalExpenses;
+  const g24Rate=parseFloat(rates.gold24)||0;
+  const goldValue=goldBal.balance*g24Rate;
+
+  // Outstanding
+  let totalReceivable=0, totalPayable=0;
+  Object.keys(parties).forEach(id=>{
+    const b=getPartyBalance(id);
+    if(b>0) totalReceivable+=b;
+    else totalPayable+=Math.abs(b);
+  });
+
+  document.getElementById('dashboard-content').innerHTML=`
+    <div style="padding-top:4px;">
+      <!-- Sync badge -->
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+        <span class="sync-badge">🔄 Synced with Gayatri Jewellers</span>
+      </div>
+
+      <!-- Gold position -->
+      <div class="gold-bar">
+        <div class="gold-bar-title">🪙 Pure Gold Position (24K Equivalent)</div>
+        <div class="gold-bar-row">
+          <div class="gold-bar-label">Total Purchased</div>
+          <div class="gold-bar-val green">${fmt(goldBal.inGold)} g</div>
+        </div>
+        <div class="gold-bar-row">
+          <div class="gold-bar-label">Given Out (Karigar/Lender)</div>
+          <div class="gold-bar-val red">${fmt(goldBal.outGold)} g</div>
+        </div>
+        <div class="gold-bar-row">
+          <div class="gold-bar-label">Sold (from Gayatri App)</div>
+          <div class="gold-bar-val red">${fmt(goldBal.soldGold)} g</div>
+        </div>
+        <hr class="gold-bar-divider"/>
+        <div class="gold-bar-row">
+          <div class="gold-bar-label" style="font-weight:700;color:var(--dark);">Gold in Hand (Net)</div>
+          <div>
+            <div class="gold-bal-big">${fmt(goldBal.balance)} g</div>
+            ${g24Rate>0?`<div style="font-size:11px;color:var(--gold2);text-align:right;">≈ ${inr(goldValue)}</div>`:''}
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats grid -->
+      <div class="dash-grid">
+        <div class="dash-stat gold-bg">
+          <div class="ds-icon">💵</div>
+          <div class="ds-label">Cash Balance</div>
+          <div class="ds-val">${inr(cashBal.balance)}</div>
+          <div class="ds-sub">Opening + All entries</div>
+        </div>
+        <div class="dash-stat ${netProfit>=0?'green-bg':''}">
+          <div class="ds-icon">${netProfit>=0?'📈':'📉'}</div>
+          <div class="ds-label">Net Profit</div>
+          <div class="ds-val">${inr(Math.abs(netProfit))}</div>
+          <div class="ds-sub">${netProfit>=0?'Profit':'Loss'} overall</div>
+        </div>
+        <div class="dash-stat">
+          <div class="ds-icon">🧾</div>
+          <div class="ds-label">Today's Sales</div>
+          <div class="ds-val">${inr(todaySales)}</div>
+          <div class="ds-sub">This month: ${inr(monthSales)}</div>
+        </div>
+        <div class="dash-stat">
+          <div class="ds-icon">💸</div>
+          <div class="ds-label">Total Expenses</div>
+          <div class="ds-val">${inr(totalExpenses)}</div>
+          <div class="ds-sub">All time</div>
+        </div>
+        <div class="dash-stat">
+          <div class="ds-icon">📥</div>
+          <div class="ds-label">To Receive</div>
+          <div class="ds-val" style="color:var(--green)">${inr(totalReceivable)}</div>
+          <div class="ds-sub">Customer outstanding</div>
+        </div>
+        <div class="dash-stat">
+          <div class="ds-icon">📤</div>
+          <div class="ds-label">To Pay</div>
+          <div class="ds-val" style="color:var(--red)">${inr(totalPayable)}</div>
+          <div class="ds-sub">Supplier outstanding</div>
+        </div>
+      </div>
+
+      <!-- Business Snapshot -->
+      <div class="card" style="margin-top:4px;">
+        <div style="font-size:11px;color:var(--gold2);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:12px;">📋 Business Snapshot</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+          <span style="font-size:13px;color:var(--mid);">Total Revenue (All time)</span>
+          <span style="font-size:13px;font-weight:700;color:var(--green)">${inr(totalRevenue)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+          <span style="font-size:13px;color:var(--mid);">Total Expenses</span>
+          <span style="font-size:13px;font-weight:700;color:var(--red)">${inr(totalExpenses)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+          <span style="font-size:13px;color:var(--mid);">Gold Stock Value</span>
+          <span style="font-size:13px;font-weight:700;color:var(--gold2)">${g24Rate>0?inr(goldValue):'Set gold rate in main app'}</span>
+        </div>
+        <hr style="border:none;border-top:1px solid var(--border);margin:8px 0;"/>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="font-size:14px;font-weight:700;color:var(--dark);">Net Business Worth</span>
+          <span style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--gold2);">${inr(cashBal.balance+(g24Rate>0?goldValue:0))}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ══ GOLD BOOK ══
+function renderGold(){
+  const entries=Object.entries(goldEntries).sort((a,b)=>b[1].timestamp-a[1].timestamp);
+  const goldBal=getGoldBalance();
+  const IN_TYPES=['purchase','karigar_in','exchange_in','lender_return','other_in'];
+  const TYPE_LABELS={
+    purchase:'Purchase', karigar_out:'Karigar Out', karigar_in:'Karigar Return',
+    exchange_in:'Old Gold In', lender_given:'To Lender', lender_return:'From Lender',
+    other_in:'Other In', other_out:'Other Out'
+  };
+
+  const filtered=goldFilter==='all'?entries:entries.filter(([k,e])=>{
+    if(goldFilter==='in') return IN_TYPES.includes(e.type);
+    if(goldFilter==='out') return !IN_TYPES.includes(e.type);
+    return e.type===goldFilter;
+  });
+
+  document.getElementById('gold-content').innerHTML=`
+    <div class="balance-bar">
+      <div>
+        <div class="bb-label">24K Gold in Hand</div>
+        <div style="font-size:11px;color:var(--muted);">${fmt(goldBal.inGold)}g in − ${fmt(goldBal.outGold+goldBal.soldGold)}g out</div>
+      </div>
+      <div class="bb-val">${fmt(goldBal.balance)} g</div>
+    </div>
+    <div class="filter-row">
+      ${['all','in','out','purchase','karigar_out','karigar_in'].map(f=>`
+        <button class="filter-chip${goldFilter===f?' active':''}" onclick="goldFilter='${f}';renderGold();">
+          ${{all:'All',in:'🟢 In',out:'🔴 Out',purchase:'Purchases',karigar_out:'Karigar Out',karigar_in:'Karigar In'}[f]}
+        </button>`).join('')}
+    </div>
+    ${filtered.length===0?`<div class="empty-state"><div class="empty-icon">🪙</div><div class="empty-text">No gold entries yet.<br/>Tap + Entry to add.</div></div>`:''}
+    ${filtered.map(([k,e])=>{
+      const isIn=IN_TYPES.includes(e.type);
+      const p=parseFloat(e.pure24k)||0;
+      return `<div class="entry-row">
+        <div class="er-left">
+          <div class="er-type ${isIn?'in':'out'}">${isIn?'▲ IN':'▼ OUT'} · ${TYPE_LABELS[e.type]||e.type}</div>
+          <div class="er-desc">${e.party||'—'}</div>
+          <div class="er-sub">Actual: ${fmt(parseFloat(e.weight)||0)}g (${e.purity||'22'}K) · Pure 24K: ${fmt(p)}g</div>
+          ${e.notes?`<div class="er-sub" style="color:var(--muted);font-style:italic;">${e.notes}</div>`:''}
+          <button class="er-del" onclick="deleteGoldEntry('${k}')">🗑 Delete</button>
+        </div>
+        <div class="er-right">
+          <div class="er-amount ${isIn?'in':'out'}">${fmt(p)}g</div>
+          ${e.value>0?`<div style="font-size:11px;color:var(--gold2);margin-top:2px;">${inr(e.value)}</div>`:''}
+          <div class="er-date">${fmtDate(e.date)}</div>
+        </div>
+      </div>`;
+    }).join('')}
+  `;
+}
+
+// ══ CASH BOOK ══
+const CASH_CATS_IN=['sale','gold_sale','capital','loan_in','other_in'];
+const CASH_CATS_OUT=['purchase','karigar_payment','rent','salary','electricity','misc_expense','loan_repay','other_out'];
+const CASH_CAT_LABELS={
+  sale:'Sale', gold_sale:'Gold Sale', capital:'Capital', loan_in:'Loan Received', other_in:'Other Income',
+  purchase:'Purchase', karigar_payment:'Karigar Payment', rent:'Rent', salary:'Salary',
+  electricity:'Electricity', misc_expense:'Misc Expense', loan_repay:'Loan Repaid', other_out:'Other Out'
+};
+
+function renderCash(){
+  const cashBal=getCashBalance();
+  const entries=Object.entries(cashEntries).sort((a,b)=>b[1].timestamp-a[1].timestamp);
+  const filtered=cashFilter==='all'?entries:entries.filter(([k,e])=>e.type===cashFilter||(cashFilter==='in'&&e.type==='in')||(cashFilter==='out'&&e.type==='out'));
+
+  document.getElementById('cash-content').innerHTML=`
+    <div class="balance-bar">
+      <div>
+        <div class="bb-label">Cash Balance</div>
+        <div style="font-size:11px;color:var(--muted);">Opening ${inr(cashBal.opening)} + Sales ${inr(cashBal.salesRevenue)}</div>
+      </div>
+      <div class="bb-val">${inr(cashBal.balance)}</div>
+    </div>
+    <div style="background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:10px;padding:10px 14px;margin-bottom:10px;display:flex;justify-content:space-between;">
+      <span style="font-size:12px;color:var(--mid);">Total In (manual)</span>
+      <span style="font-size:13px;font-weight:700;color:var(--green);">${inr(cashBal.totalIn)}</span>
+    </div>
+    <div style="background:#FFF5F5;border:1px solid #FECACA;border-radius:10px;padding:10px 14px;margin-bottom:12px;display:flex;justify-content:space-between;">
+      <span style="font-size:12px;color:var(--mid);">Total Out</span>
+      <span style="font-size:13px;font-weight:700;color:var(--red);">${inr(cashBal.totalOut)}</span>
+    </div>
+    <div class="filter-row">
+      ${['all','in','out'].map(f=>`
+        <button class="filter-chip${cashFilter===f?' active':''}" onclick="cashFilter='${f}';renderCash();">
+          ${{all:'All',in:'🟢 Cash In',out:'🔴 Cash Out'}[f]}
+        </button>`).join('')}
+    </div>
+    ${entries.length===0?`<div class="empty-state"><div class="empty-icon">💵</div><div class="empty-text">No cash entries yet.<br/>Tap + Entry to add.</div></div>`:''}
+    ${filtered.map(([k,e])=>{
+      const isIn=e.type==='in';
+      return `<div class="entry-row">
+        <div class="er-left">
+          <div class="er-type ${isIn?'in':'out'}">${isIn?'▲ CASH IN':'▼ CASH OUT'} · ${CASH_CAT_LABELS[e.category]||e.category}</div>
+          <div class="er-desc">${e.description||'—'}</div>
+          ${e.party?`<div class="er-sub">Party: ${e.party}</div>`:''}
+          <button class="er-del" onclick="deleteCashEntry('${k}')">🗑 Delete</button>
+        </div>
+        <div class="er-right">
+          <div class="er-amount ${isIn?'in':'out'}">${inr(parseFloat(e.amount)||0)}</div>
+          <div class="er-date">${fmtDate(e.date)}</div>
+        </div>
+      </div>`;
+    }).join('')}
+  `;
+}
+
+// ══ PARTIES ══
+function renderParties(){
+  const partyArr=Object.entries(parties).sort((a,b)=>a[1].name?.localeCompare(b[1].name));
+  const types=['All','Customer','Supplier','Karigar','Lender','Other'];
+
+  document.getElementById('parties-content').innerHTML=`
+    ${partyArr.length===0?`<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-text">No parties added yet.<br/>Tap + Party to add a customer or supplier.</div></div>`:''}
+    ${partyArr.map(([id,p])=>{
+      const bal=getPartyBalance(id);
+      const balClass=bal>0?'dr':bal<0?'cr':'zero';
+      const balLabel=bal>0?'To Receive':bal<0?'To Pay':'Settled';
+      return `<div class="party-card" onclick="openPartyDetail('${id}')">
+        <div class="pc-header">
+          <div class="pc-name">${p.name}</div>
+          <div class="pc-type">${p.type||'Other'}</div>
+        </div>
+        ${p.phone?`<div class="pc-sub">📞 ${p.phone}</div>`:''}
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:8px;">
+          <div style="font-size:11px;color:var(--muted);">${balLabel}</div>
+          <div class="pc-bal ${balClass}">${inr(Math.abs(bal))}</div>
+        </div>
+      </div>`;
+    }).join('')}
+  `;
+}
+
+function openPartyDetail(id){
+  currentPartyId=id;
+  const p=parties[id];
+  if(!p) return;
+  document.getElementById('pdl-title').textContent=p.name;
+  document.getElementById('pdl-type-label').textContent=p.type+' Ledger';
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-party-detail').classList.add('active');
+  currentScreen='party-detail';
+  renderPartyDetail();
+}
+
+function renderPartyDetail(){
+  if(!currentPartyId||!parties[currentPartyId]) return;
+  const p=parties[currentPartyId];
+  const bal=getPartyBalance(currentPartyId);
+  const txns=Object.entries(partyTxns).filter(([k,t])=>t.partyId===currentPartyId).sort((a,b)=>b[1].timestamp-a[1].timestamp);
+  const TXN_LABELS={
+    credit_sale:'Credit Sale',payment_received:'Payment Received',
+    credit_purchase:'Credit Purchase',payment_made:'Payment Made',
+    debit:'Debit',credit:'Credit'
+  };
+  const isDebit=(type)=>['credit_sale','debit','payment_made'].includes(type);
+
+  document.getElementById('party-detail-content').innerHTML=`
+    <div style="background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:12px;padding:14px 16px;margin-bottom:12px;">
+      <div style="font-size:11px;color:var(--gold2);font-weight:700;letter-spacing:1px;margin-bottom:4px;">${p.type||'PARTY'} LEDGER</div>
+      <div style="font-size:13px;color:var(--mid);">${p.phone?'📞 '+p.phone:''}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+        <div style="font-size:13px;color:var(--mid);">${bal>0?'Outstanding (To Receive)':bal<0?'Outstanding (To Pay)':'Fully Settled'}</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:${bal>0?'var(--green)':bal<0?'var(--red)':'var(--muted)'};">${inr(Math.abs(bal))}</div>
+      </div>
+    </div>
+    <button onclick="deleteParty('${currentPartyId}')" style="background:none;border:1px solid #FECACA;color:var(--red);border-radius:8px;padding:6px 14px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:12px;">🗑 Delete Party</button>
+    ${txns.length===0?`<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No transactions yet.</div></div>`:''}
+    ${txns.map(([k,t])=>{
+      const deb=isDebit(t.type);
+      return `<div class="entry-row">
+        <div class="er-left">
+          <div class="er-type ${deb?'out':'in'}">${TXN_LABELS[t.type]||t.type}</div>
+          <div class="er-desc">${t.description||'—'}</div>
+          <button class="er-del" onclick="deletePartyTxn('${k}')">🗑</button>
+        </div>
+        <div class="er-right">
+          <div class="er-amount ${deb?'out':'in'}">${inr(parseFloat(t.amount)||0)}</div>
+          <div class="er-date">${fmtDate(t.date)}</div>
+        </div>
+      </div>`;
+    }).join('')}
+    <div style="height:12px;"></div>
+    <button onclick="showScreen('parties')" style="background:none;border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif;">← Back to Parties</button>
+  `;
+}
+
+// ══ REPORTS ══
+let reportPeriod='month';
+function renderReports(){
+  const salesArr=Object.values(sales);
+  const periodSales=salesArr.filter(s=>inPeriod(s.date,reportPeriod));
+  const periodRevenue=periodSales.reduce((a,s)=>a+(parseFloat(s.total)||0),0);
+  const periodExpenses=Object.values(cashEntries).filter(e=>e.type==='out'&&inPeriod(e.date,reportPeriod)).reduce((a,e)=>a+(parseFloat(e.amount)||0),0);
+  const periodCashIn=Object.values(cashEntries).filter(e=>e.type==='in'&&inPeriod(e.date,reportPeriod)).reduce((a,e)=>a+(parseFloat(e.amount)||0),0);
+  const grossProfit=periodRevenue-periodExpenses;
+  const goldBal=getGoldBalance();
+  const g24Rate=parseFloat(rates.gold24)||0;
+  const cashBal=getCashBalance();
+
+  // Expense breakdown
+  const expBreak={};
+  Object.values(cashEntries).filter(e=>e.type==='out'&&inPeriod(e.date,reportPeriod)).forEach(e=>{
+    const cat=CASH_CAT_LABELS[e.category]||e.category||'Other';
+    expBreak[cat]=(expBreak[cat]||0)+(parseFloat(e.amount)||0);
+  });
+
+  // Gold summary
+  const IN_TYPES=['purchase','karigar_in','exchange_in','lender_return','other_in'];
+  const OUT_TYPES=['karigar_out','lender_given','other_out'];
+  let goldPurchased=0, goldGiven=0, goldWithKarigar=0;
+  Object.values(goldEntries).forEach(e=>{
+    const p=parseFloat(e.pure24k)||0;
+    if(e.type==='purchase') goldPurchased+=p;
+    if(e.type==='karigar_out') goldGiven+=p;
+    if(e.type==='karigar_in') goldWithKarigar-=p;
+  });
+  goldWithKarigar=goldGiven+goldWithKarigar;
+
+  document.getElementById('reports-content').innerHTML=`
+    <div class="period-btns">
+      ${[['today','Today'],['week','This Week'],['month','This Month'],['year','This Year'],['all','All Time']].map(([v,l])=>`
+        <button class="period-btn${reportPeriod===v?' active':''}" onclick="reportPeriod='${v}';renderReports();">${l}</button>`).join('')}
+    </div>
+
+    <!-- P&L -->
+    <div class="r-section">📈 Profit & Loss</div>
+    <div class="pl-row income"><span class="pl-label">Sales Revenue</span><span class="pl-val income">${inr(periodRevenue)}</span></div>
+    <div class="pl-row income"><span class="pl-label">Other Cash In</span><span class="pl-val income">${inr(periodCashIn)}</span></div>
+    <div class="pl-row expense"><span class="pl-label">Total Expenses</span><span class="pl-val expense">${inr(periodExpenses)}</span></div>
+    <div class="pl-row ${grossProfit>=0?'profit':'loss'}">
+      <span class="pl-label" style="font-weight:700;">${grossProfit>=0?'Net Profit':'Net Loss'}</span>
+      <span class="pl-val ${grossProfit>=0?'profit':'loss'}" style="font-size:18px;">${inr(Math.abs(grossProfit))}</span>
+    </div>
+
+    <!-- Expenses breakdown -->
+    ${Object.keys(expBreak).length>0?`
+      <div class="r-section">💸 Expense Breakdown</div>
+      ${Object.entries(expBreak).sort((a,b)=>b[1]-a[1]).map(([cat,amt])=>`
+        <div class="pl-row expense"><span class="pl-label">${cat}</span><span class="pl-val expense">${inr(amt)}</span></div>`).join('')}
+    `:''}
+
+    <!-- Gold Summary -->
+    <div class="r-section">🪙 Gold Account Summary</div>
+    <div class="card">
+      <div style="margin-bottom:8px;display:flex;justify-content:space-between;">
+        <span style="font-size:13px;color:var(--mid);">Total 24K Gold Purchased</span>
+        <span style="font-size:13px;font-weight:700;color:var(--green);">${fmt(goldBal.inGold)} g</span>
+      </div>
+      <div style="margin-bottom:8px;display:flex;justify-content:space-between;">
+        <span style="font-size:13px;color:var(--mid);">Given to Karigar</span>
+        <span style="font-size:13px;font-weight:700;color:var(--red);">${fmt(goldBal.outGold)} g</span>
+      </div>
+      <div style="margin-bottom:8px;display:flex;justify-content:space-between;">
+        <span style="font-size:13px;color:var(--mid);">Gold with Karigar (Net)</span>
+        <span style="font-size:13px;font-weight:700;color:var(--gold2);">${fmt(goldWithKarigar)} g</span>
+      </div>
+      <div style="margin-bottom:8px;display:flex;justify-content:space-between;">
+        <span style="font-size:13px;color:var(--mid);">Sold (from Billing App)</span>
+        <span style="font-size:13px;font-weight:700;color:var(--red);">${fmt(goldBal.soldGold)} g</span>
+      </div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:8px 0;"/>
+      <div style="display:flex;justify-content:space-between;">
+        <span style="font-size:14px;font-weight:700;">Gold in Hand (24K)</span>
+        <span style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--gold2);">${fmt(goldBal.balance)} g</span>
+      </div>
+      ${g24Rate>0?`<div style="text-align:right;font-size:12px;color:var(--gold2);margin-top:4px;">Value: ${inr(goldBal.balance*g24Rate)} @ ${inr(g24Rate)}/g</div>`:''}
+    </div>
+
+    <!-- Business Position -->
+    <div class="r-section">🏦 Business Position (Total)</div>
+    <div class="card">
+      <div style="font-size:11px;color:var(--gold2);letter-spacing:1.5px;font-weight:700;margin-bottom:12px;">ASSETS</div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+        <span style="font-size:13px;color:var(--mid);">Cash in Hand</span>
+        <span style="font-size:13px;font-weight:600;">${inr(cashBal.balance)}</span>
+      </div>
+      ${g24Rate>0?`<div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+        <span style="font-size:13px;color:var(--mid);">Gold Stock Value</span>
+        <span style="font-size:13px;font-weight:600;">${inr(goldBal.balance*g24Rate)}</span>
+      </div>`:''}
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+        <span style="font-size:13px;color:var(--mid);">To Receive (Parties)</span>
+        <span style="font-size:13px;font-weight:600;color:var(--green);">${inr(Object.keys(parties).reduce((a,id)=>{const b=getPartyBalance(id);return a+(b>0?b:0);},0))}</span>
+      </div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:10px 0;"/>
+      <div style="display:flex;justify-content:space-between;">
+        <span style="font-size:14px;font-weight:700;color:var(--dark);">Total Business Worth</span>
+        <span style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--gold2);">${inr(cashBal.balance+(g24Rate>0?goldBal.balance*g24Rate:0))}</span>
+      </div>
+    </div>
+
+    <div style="height:20px;"></div>
+  `;
+}
+
+// ══ GOLD MODAL ══
+function openGoldModal(){
+  document.getElementById('g-date').value=today();
+  document.getElementById('g-purity').value='22';
+  document.getElementById('g-weight').value='';
+  document.getElementById('g-pure').value='';
+  document.getElementById('g-rate').value=rates.gold22||'';
+  document.getElementById('g-value').value='';
+  document.getElementById('g-party').value='';
+  document.getElementById('g-notes').value='';
+  document.getElementById('gold-modal-overlay').classList.remove('hidden');
+}
+function closeGoldModal(e){if(!e||e.target===document.getElementById('gold-modal-overlay'))document.getElementById('gold-modal-overlay').classList.add('hidden');}
+function calcPure24k(){
+  const w=parseFloat(document.getElementById('g-weight').value)||0;
+  const p=document.getElementById('g-purity').value;
+  const k=p==='custom'?(parseFloat(document.getElementById('g-custom-karat').value)||22):parseFloat(p);
+  const pure=(w*k/24);
+  document.getElementById('g-pure').value=pure.toFixed(3);
+  calcGoldValue();
+}
+function calcGoldValue(){
+  const pure=parseFloat(document.getElementById('g-pure').value)||0;
+  const rate=parseFloat(document.getElementById('g-rate').value)||0;
+  // For 24K pure value: pure grams * 24K rate
+  const val=pure*rate;
+  document.getElementById('g-value').value=val?val.toFixed(0):'';
+}
+function updateGoldTypeUI(){}
+async function saveGoldEntry(){
+  const db=window._db,r=window._ref,push=window._push;
+  const date=document.getElementById('g-date').value;
+  const type=document.getElementById('g-type').value;
+  const purity=document.getElementById('g-purity').value;
+  const weight=parseFloat(document.getElementById('g-weight').value)||0;
+  const pure24=parseFloat(document.getElementById('g-pure').value)||0;
+  const rate=parseFloat(document.getElementById('g-rate').value)||0;
+  const value=parseFloat(document.getElementById('g-value').value)||0;
+  const party=document.getElementById('g-party').value.trim();
+  const notes=document.getElementById('g-notes').value.trim();
+  if(!date||!weight){showToast('⚠️ Fill date & weight');return;}
+  const entry={date,type,purity,weight,pure24k:pure24,rate,value,party,notes,timestamp:Date.now()};
+  await push(r(db,'gold_entries'),entry);
+  document.getElementById('gold-modal-overlay').classList.add('hidden');
+  showToast('✅ Gold entry saved');
+}
+async function deleteGoldEntry(k){
+  if(!confirm('Delete this gold entry?')) return;
+  await window._remove(window._ref(window._db,'gold_entries/'+k));
+  showToast('🗑 Deleted');
+}
+
+// ══ CASH MODAL ══
+function openCashModal(){
+  document.getElementById('c-date').value=today();
+  document.getElementById('c-type').value='in';
+  updateCashCatUI();
+  document.getElementById('c-amount').value='';
+  document.getElementById('c-desc').value='';
+  document.getElementById('c-party').value='';
+  document.getElementById('cash-modal-overlay').classList.remove('hidden');
+}
+function closeCashModal(e){if(!e||e.target===document.getElementById('cash-modal-overlay'))document.getElementById('cash-modal-overlay').classList.add('hidden');}
+function updateCashCatUI(){
+  const type=document.getElementById('c-type').value;
+  const sel=document.getElementById('c-cat');
+  if(type==='in'){
+    sel.innerHTML=`<option value="sale">Sale</option><option value="gold_sale">Gold Sale</option><option value="capital">Capital Invested</option><option value="loan_in">Loan Received</option><option value="other_in">Other Income</option>`;
+  } else {
+    sel.innerHTML=`<option value="purchase">Purchase</option><option value="karigar_payment">Karigar Payment</option><option value="rent">Rent</option><option value="salary">Salary</option><option value="electricity">Electricity</option><option value="misc_expense">Misc Expense</option><option value="loan_repay">Loan Repaid</option><option value="other_out">Other Out</option>`;
+  }
+}
+async function saveCashEntry(){
+  const db=window._db,r=window._ref,push=window._push;
+  const date=document.getElementById('c-date').value;
+  const type=document.getElementById('c-type').value;
+  const category=document.getElementById('c-cat').value;
+  const amount=parseFloat(document.getElementById('c-amount').value)||0;
+  const description=document.getElementById('c-desc').value.trim();
+  const party=document.getElementById('c-party').value.trim();
+  if(!date||!amount){showToast('⚠️ Fill date & amount');return;}
+  await push(r(db,'cash_entries'),{date,type,category,amount,description,party,timestamp:Date.now()});
+  document.getElementById('cash-modal-overlay').classList.add('hidden');
+  showToast('✅ Cash entry saved');
+}
+async function deleteCashEntry(k){
+  if(!confirm('Delete this entry?')) return;
+  await window._remove(window._ref(window._db,'cash_entries/'+k));
+  showToast('🗑 Deleted');
+}
+
+// ══ PARTY MODAL ══
+function openPartyModal(){
+  document.getElementById('p-name').value='';
+  document.getElementById('p-type').value='Customer';
+  document.getElementById('p-phone').value='';
+  document.getElementById('p-opening').value='0';
+  document.getElementById('party-modal-overlay').classList.remove('hidden');
+}
+function closePartyModal(e){if(!e||e.target===document.getElementById('party-modal-overlay'))document.getElementById('party-modal-overlay').classList.add('hidden');}
+async function saveParty(){
+  const db=window._db,r=window._ref,push=window._push;
+  const name=document.getElementById('p-name').value.trim();
+  const type=document.getElementById('p-type').value;
+  const phone=document.getElementById('p-phone').value.trim();
+  const openingBalance=parseFloat(document.getElementById('p-opening').value)||0;
+  const openingType=document.getElementById('p-opening-type').value;
+  if(!name){showToast('⚠️ Enter party name');return;}
+  await push(r(db,'parties'),{name,type,phone,openingBalance,openingType,timestamp:Date.now()});
+  document.getElementById('party-modal-overlay').classList.add('hidden');
+  showToast('✅ Party added');
+}
+async function deleteParty(id){
+  if(!confirm('Delete this party and all their transactions?')) return;
+  await window._remove(window._ref(window._db,'parties/'+id));
+  // delete their txns
+  Object.entries(partyTxns).forEach(([k,t])=>{if(t.partyId===id)window._remove(window._ref(window._db,'party_txns/'+k));});
+  showScreen('parties');
+  showToast('🗑 Party deleted');
+}
+
+// ══ PARTY TXN MODAL ══
+function openPartyTxnModal(){
+  document.getElementById('pt-date').value=today();
+  document.getElementById('pt-type').value='credit_sale';
+  document.getElementById('pt-amount').value='';
+  document.getElementById('pt-desc').value='';
+  document.getElementById('party-txn-modal-overlay').classList.remove('hidden');
+}
+function closePartyTxnModal(e){if(!e||e.target===document.getElementById('party-txn-modal-overlay'))document.getElementById('party-txn-modal-overlay').classList.add('hidden');}
+async function savePartyTxn(){
+  if(!currentPartyId){showToast('No party selected');return;}
+  const db=window._db,r=window._ref,push=window._push;
+  const date=document.getElementById('pt-date').value;
+  const type=document.getElementById('pt-type').value;
+  const amount=parseFloat(document.getElementById('pt-amount').value)||0;
+  const description=document.getElementById('pt-desc').value.trim();
+  if(!date||!amount){showToast('⚠️ Fill date & amount');return;}
+  const p=parties[currentPartyId];
+  await push(r(db,'party_txns'),{date,type,amount,description,partyId:currentPartyId,partyName:p?.name||'',timestamp:Date.now()});
+  document.getElementById('party-txn-modal-overlay').classList.add('hidden');
+  showToast('✅ Transaction saved');
+}
+async function deletePartyTxn(k){
+  if(!confirm('Delete this transaction?')) return;
+  await window._remove(window._ref(window._db,'party_txns/'+k));
+  showToast('🗑 Deleted');
+}
+
+// ══ SETTINGS ══
+function openSettings(){
+  document.getElementById('s-opening-cash').value=acctSettings.cashOpening||'0';
+  document.getElementById('s-opening-date').value=acctSettings.cashOpeningDate||today();
+  document.getElementById('s-old-pin').value='';
+  document.getElementById('s-new-pin').value='';
+  document.getElementById('s-pin-err').textContent='';
+  document.getElementById('settings-modal-overlay').classList.remove('hidden');
+}
+function closeSettings(e){if(!e||e.target===document.getElementById('settings-modal-overlay'))document.getElementById('settings-modal-overlay').classList.add('hidden');}
+async function saveSettings(){
+  const db=window._db,r=window._ref,set=window._set;
+  const newSettings={...acctSettings};
+  newSettings.cashOpening=parseFloat(document.getElementById('s-opening-cash').value)||0;
+  newSettings.cashOpeningDate=document.getElementById('s-opening-date').value;
+  const oldPin=document.getElementById('s-old-pin').value;
+  const newPin=document.getElementById('s-new-pin').value;
+  if(oldPin||newPin){
+    if(oldPin!==acctSettings.pin){document.getElementById('s-pin-err').textContent='Current PIN is wrong!';return;}
+    if(newPin.length<4){document.getElementById('s-pin-err').textContent='New PIN must be at least 4 digits.';return;}
+    newSettings.pin=newPin;
+  }
+  await set(r(db,'acct_settings'),newSettings);
+  document.getElementById('settings-modal-overlay').classList.add('hidden');
+  showToast('✅ Settings saved');
+}
+
+// ══ INIT ══
+window.addEventListener('DOMContentLoaded',()=>{
+  document.addEventListener('firebase-ready',()=>{
+    initFirebase();
+    setTimeout(()=>{
+      document.getElementById('loading').style.display='none';
+      document.getElementById('login-screen').style.display='flex';
+    },1200);
+  });
+});
+</script>
+</body>
+</html>
