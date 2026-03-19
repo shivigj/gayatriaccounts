@@ -1,0 +1,2356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>Gayatri Jewellers</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getDatabase, ref, onValue, set, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+  const firebaseConfig = {
+    apiKey: "AIzaSyBK8p-lRmx1TfU2fx_Hed7ioUKieJKwLII",
+    authDomain: "gayatri-jewellers-v2.firebaseapp.com",
+    databaseURL: "https://gayatri-jewellers-v2-default-rtdb.firebaseio.com",
+    projectId: "gayatri-jewellers-v2",
+    storageBucket: "gayatri-jewellers-v2.firebasestorage.app",
+    messagingSenderId: "919249152249",
+    appId: "1:919249152249:web:16e64c5cc08a2f709e5a28",
+    measurementId: "G-YPY75MNWPL"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  window._db=db; window._ref=ref; window._onValue=onValue;
+  window._set=set; window._push=push; window._remove=remove; window._update=update;
+  window._firebaseReady=true;
+  document.dispatchEvent(new Event('firebase-ready'));
+</script>
+
+<style>
+:root{
+  --gold:#B8960C; --gold2:#C9A84C; --gold3:#E2C97E; --gold-bg:#FAF6E9;
+  --gold-border:#E5D48A; --cream:#FDFAF3; --cream2:#F5F0E4;
+  --dark:#1A1714; --brown:#3D2E14; --mid:#6B5A38; --muted:#9C8E72;
+  --white:#FFFFFF; --border:#EDE6D0; --bg:#F5F0E4;
+  --red:#C0392B; --green:#25A244;
+  --shadow:0 1px 4px rgba(0,0,0,0.06); --shadow2:0 4px 20px rgba(0,0,0,0.10);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--dark);max-width:480px;margin:0 auto;display:flex;flex-direction:column;}
+
+/* LOADING */
+#loading{position:fixed;inset:0;background:var(--cream);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:14px;}
+.load-ring{width:52px;height:52px;border-radius:50%;border:3px solid var(--cream2);border-top-color:var(--gold2);animation:spin .9s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.load-name{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--gold2);}
+
+/* LOGIN */
+#login-screen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:var(--cream);}
+.login-logo{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#9A7B0A,#C9A84C);display:flex;align-items:center;justify-content:center;font-size:30px;color:#fff;margin:0 auto 18px;box-shadow:0 8px 24px rgba(180,140,20,.30);}
+.login-brand{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:var(--dark);text-align:center;margin-bottom:3px;}
+.login-sub{font-size:10px;color:var(--gold2);letter-spacing:3px;text-align:center;margin-bottom:36px;}
+.login-card{background:#fff;border:1px solid var(--border);border-radius:20px;padding:32px 24px;width:100%;max-width:340px;box-shadow:var(--shadow2);}
+.lbl{font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;display:block;}
+.linput{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:13px;font-size:20px;font-family:monospace;letter-spacing:8px;text-align:center;outline:none;background:var(--cream);transition:border .2s;}
+.linput:focus{border-color:var(--gold2);}
+.lerr{font-size:12px;color:var(--red);text-align:center;margin-top:8px;min-height:18px;}
+.lbtn{width:100%;background:linear-gradient(135deg,#9A7B0A,#C9A84C);color:#fff;border:none;border-radius:10px;padding:14px;font-size:14px;font-weight:600;letter-spacing:1px;cursor:pointer;margin-top:14px;font-family:'DM Sans',sans-serif;}
+.lbtn:active{opacity:.9;}
+
+/* APP SHELL */
+#app-shell{display:none;flex-direction:column;height:100vh;overflow:hidden;}
+
+/* TOP BAR */
+.top-bar{background:#fff;border-bottom:1px solid var(--border);padding:8px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.tb-brand-name{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:700;color:var(--dark);line-height:1.1;}
+.tb-brand-sub{font-size:9px;color:var(--muted);letter-spacing:2px;}
+.tb-date{font-size:9px;color:var(--gold2);letter-spacing:.5px;font-weight:600;margin-top:2px;}
+.tb-right{display:flex;gap:8px;align-items:center;}
+.owner-badge{background:linear-gradient(135deg,#9A7B0A,#C9A84C);color:#fff;border:none;border-radius:20px;padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.staff-badge{background:#fff;color:var(--gold2);border:1.5px solid var(--gold-border);border-radius:20px;padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.exit-btn2{background:none;border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif;}
+
+/* SCROLL */
+.main-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--bg);}
+
+/* SCREENS */
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* HOME */
+.home-pad{padding:12px;}
+.rate-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.rate-label{font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px;}
+.rate-value{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:var(--dark);}
+.rate-sub{font-size:11px;color:var(--muted);margin-top:1px;}
+.rate-input-box{border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;font-size:15px;font-weight:600;color:var(--dark);background:var(--cream);width:90px;text-align:center;outline:none;font-family:'DM Sans',sans-serif;}
+.rate-input-box:focus{border-color:var(--gold2);}
+.find-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;}
+.find-label{font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+.find-row{display:flex;gap:8px;}
+.find-input{flex:1;border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;font-size:14px;outline:none;background:var(--cream);font-family:'DM Sans',sans-serif;color:var(--dark);}
+.find-input:focus{border-color:var(--gold2);}
+.find-btn{background:linear-gradient(135deg,#9A7B0A,#C9A84C);color:#fff;border:none;border-radius:10px;padding:11px 18px;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.5px;font-family:'DM Sans',sans-serif;}
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.qbtn{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px 14px;cursor:pointer;text-align:left;font-family:'DM Sans',sans-serif;box-shadow:var(--shadow);transition:transform .1s;}
+.qbtn:active{transform:scale(.97);}
+.qbtn-icon{font-size:22px;margin-bottom:8px;display:block;}
+.qbtn-title{font-size:14px;font-weight:600;color:var(--dark);margin-bottom:2px;}
+.qbtn-sub{font-size:11px;color:var(--muted);}
+
+/* BOTTOM NAV */
+.bottom-nav{background:#fff;border-top:1px solid var(--border);display:flex;flex-shrink:0;padding:0 4px;}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px 10px;background:none;border:none;cursor:pointer;color:var(--muted);gap:3px;font-family:'DM Sans',sans-serif;transition:color .15s;position:relative;min-width:0;}
+.nav-btn.active{color:var(--gold2);}
+.nav-btn.active .nav-icon{transform:scale(1.1);}
+.nav-btn.active::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:28px;height:2.5px;background:var(--gold2);border-radius:0 0 4px 4px;}
+.nav-icon{font-size:20px;line-height:1;transition:transform .15s;}
+.nav-label{font-size:9px;font-weight:600;letter-spacing:.2px;white-space:nowrap;}
+/* MORE DRAWER */
+.more-overlay{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.35);display:none;}
+.more-overlay.open{display:block;}
+.more-sheet{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-radius:20px 20px 0 0;z-index:901;padding:14px 16px 28px;box-shadow:0 -4px 24px rgba(0,0,0,.12);}
+.more-sheet-handle{width:36px;height:4px;background:var(--border);border-radius:4px;margin:0 auto 16px;}
+.more-sheet-title{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:14px;}
+.more-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.more-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 6px;background:var(--cream2);border-radius:14px;border:1px solid var(--border);cursor:pointer;font-family:'DM Sans',sans-serif;border:none;width:100%;}
+.more-item.active{background:var(--gold-bg);border:1.5px solid var(--gold-border);}
+.more-item-icon{font-size:22px;line-height:1;}
+.more-item-label{font-size:10px;font-weight:700;color:var(--dark);letter-spacing:.2px;}
+.more-item.active .more-item-label{color:var(--gold2);}
+
+/* PAGE HEADER */
+.page-hdr{padding:14px 16px 10px;background:#fff;border-bottom:1px solid var(--border);}
+.page-hdr-label{font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:var(--dark);margin-top:2px;}
+.scr-pad{padding:14px 14px;}
+
+/* CARDS */
+.card{background:#fff;border-radius:14px;padding:16px;margin-bottom:10px;border:1px solid var(--border);box-shadow:var(--shadow);}
+
+/* FORMS */
+.fl{font-size:10px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px;margin-top:12px;display:block;font-weight:600;}
+.fi{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;font-size:14px;outline:none;background:var(--cream);font-family:'DM Sans',sans-serif;color:var(--dark);transition:border .2s;}
+.fi:focus{border-color:var(--gold2);}
+select.fi{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239C8E72' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;}
+textarea.fi{resize:vertical;min-height:64px;}
+.fi-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+/* BUTTONS */
+.btn-gold{background:linear-gradient(135deg,#9A7B0A,#C9A84C);color:#fff;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:.5px;width:100%;transition:opacity .15s,transform .1s;}
+.btn-gold:active{transform:scale(.98);}
+.btn-gold:disabled{opacity:.45;}
+.btn-whatsapp{background:#25A244;color:#fff;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;width:100%;margin-top:10px;}
+.btn-outline{background:none;border:1.5px solid var(--border);color:var(--dark);border-radius:10px;padding:9px 14px;font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.btn-danger{background:none;border:1.5px solid #FECACA;color:var(--red);border-radius:10px;padding:9px 14px;font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;}
+
+/* INVENTORY */
+.inv-item{background:#fff;border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid var(--border);display:flex;gap:10px;align-items:flex-start;}
+.inv-photo{width:66px;height:66px;border-radius:8px;object-fit:cover;border:1px solid var(--border);flex-shrink:0;}
+.inv-no-photo{width:66px;height:66px;border-radius:8px;background:var(--cream2);border:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.inv-body{flex:1;min-width:0;}
+.inv-tag{font-size:12px;color:var(--gold2);font-weight:600;}
+.inv-name{font-size:14px;font-weight:600;color:var(--dark);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.inv-meta{font-size:11px;color:var(--muted);margin-top:1px;}
+.inv-price{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:700;color:var(--gold2);flex-shrink:0;text-align:right;}
+
+/* CHIPS */
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;margin-bottom:12px;}
+.chips::-webkit-scrollbar{display:none;}
+.chip{background:#fff;border:1.5px solid var(--border);border-radius:20px;padding:5px 14px;font-size:11px;cursor:pointer;white-space:nowrap;color:var(--mid);font-family:'DM Sans',sans-serif;flex-shrink:0;font-weight:500;}
+.chip.active{background:var(--dark);color:#fff;border-color:var(--dark);}
+
+/* AUTOCOMPLETE */
+.ac-wrap{position:relative;}
+.ac-drop{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border-radius:12px;border:1px solid var(--border);z-index:300;box-shadow:var(--shadow2);max-height:260px;overflow-y:auto;display:none;}
+.ac-drop.open{display:block;}
+.ac-item{padding:11px 14px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.ac-item:last-child{border-bottom:none;}
+.ac-item:active{background:var(--gold-bg);}
+.ac-thumb{width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0;border:1px solid var(--border);}
+.ac-tag{font-weight:700;color:var(--gold2);font-size:13px;}
+.ac-name{color:var(--muted);font-size:12px;}
+
+/* PRICE BREAKDOWN */
+.bd-wrap{background:#fff;border-radius:14px;overflow:hidden;margin-bottom:12px;border:1px solid var(--border);}
+.bd-header{padding:14px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);}
+.bd-cat-row{display:flex;align-items:center;gap:10px;}
+.bd-cat-icon{width:28px;height:28px;border-radius:50%;background:var(--gold-bg);border:1.5px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-size:13px;}
+.bd-cat-name{font-size:14px;font-weight:700;color:var(--dark);letter-spacing:.5px;}
+.bd-karat{background:var(--gold-bg);border:1px solid var(--gold-border);color:var(--gold2);font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;}
+.bd-row{display:flex;justify-content:space-between;align-items:flex-start;padding:13px 18px;border-bottom:1px solid #F4EFE0;}
+.bd-label{font-size:14px;color:var(--dark);}
+.bd-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.bd-val{font-size:14px;color:var(--dark);font-weight:500;text-align:right;}
+.bd-total{background:linear-gradient(135deg,#9A7B0A,#C9A84C);padding:18px 20px;display:flex;justify-content:space-between;align-items:center;}
+.bd-total-label{font-size:11px;color:rgba(255,255,255,.75);letter-spacing:2px;text-transform:uppercase;font-weight:600;}
+.bd-total-val{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:700;color:#fff;}
+
+/* BILL */
+.bill-header-box{background:var(--gold-bg);padding:22px 16px;text-align:center;margin-bottom:0;border-bottom:1px solid var(--gold-border);}
+.bill-header-brand{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:var(--dark);letter-spacing:.5px;}
+.bill-header-sub{font-size:10px;color:var(--gold2);letter-spacing:2px;margin:3px 0;}
+.bill-header-date{font-size:12px;color:var(--muted);margin-top:6px;}
+.bill-no-items{text-align:center;padding:24px;font-size:13px;color:var(--muted);}
+.bill-item-row{background:#fff;border-radius:10px;padding:11px 12px;margin-bottom:6px;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.bill-item-name{font-size:13px;font-weight:600;color:var(--dark);}
+.bill-item-meta{font-size:11px;color:var(--muted);}
+.bill-item-price{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:700;color:var(--gold2);}
+.bill-item-del{background:none;border:none;color:#ccc;font-size:22px;cursor:pointer;padding:0 4px;line-height:1;}
+.disc-section{background:#fff;border-radius:0;padding:16px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.disc-title{font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;font-weight:600;margin-bottom:12px;}
+.disc-pct-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.disc-pct-label{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;font-weight:600;flex-shrink:0;}
+.disc-pct-input{border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;font-size:14px;width:100%;outline:none;background:var(--cream);font-family:'DM Sans',sans-serif;}
+.disc-pct-input:focus{border-color:var(--gold2);}
+.disc-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:13px;}
+.disc-applied{color:var(--gold2);font-weight:600;}
+.grand-row{background:var(--gold-bg);padding:16px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--gold-border);border-bottom:1px solid var(--gold-border);}
+.gt-label{font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;}
+.gt-val{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:var(--dark);}
+
+/* REPORTS */
+.reports-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.rstat{background:#fff;border-radius:12px;padding:14px;border:1px solid var(--border);}
+.rstat-icon{font-size:18px;margin-bottom:6px;}
+.rstat-label{font-size:9px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;font-weight:600;margin-bottom:4px;}
+.rstat-val{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--dark);}
+.rstat-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.r-inv-bar{background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:12px;padding:14px 16px;margin-bottom:10px;}
+.r-inv-label{font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;font-weight:600;margin-bottom:4px;}
+.r-inv-val{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:var(--dark);}
+.r-inv-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+.r-section-hdr{display:flex;align-items:center;gap:8px;margin:14px 0 8px;font-size:14px;font-weight:700;color:var(--dark);}
+.r-cat-row{background:#fff;border-radius:10px;padding:12px 14px;margin-bottom:6px;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.r-cat-icon{width:28px;height:28px;border-radius:50%;background:var(--gold-bg);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.r-cat-name{font-size:13px;font-weight:600;color:var(--dark);}
+.r-cat-sub{font-size:11px;color:var(--muted);}
+.r-cat-count{font-size:13px;font-weight:700;color:var(--gold2);}
+.period-btn{background:#fff;border:1.5px solid var(--border);border-radius:20px;padding:5px 14px;font-size:11px;cursor:pointer;color:var(--mid);font-family:'DM Sans',sans-serif;font-weight:500;}
+.period-btn.active{background:var(--dark);color:#fff;border-color:var(--dark);}
+
+/* SALE RECORD CARD */
+.sale-card{background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid var(--border);box-shadow:var(--shadow);}
+.sale-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.sale-item-row{background:var(--cream);border-radius:8px;padding:9px 11px;margin-bottom:5px;border:1px solid var(--border);}
+.sale-item-charges{font-size:11px;color:var(--muted);margin-top:3px;}
+
+/* ADD FORM */
+.form-page-hdr{padding:12px 16px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.back-circle{width:32px;height:32px;border-radius:50%;background:var(--gold-bg);border:1.5px solid var(--gold-border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:var(--gold2);flex-shrink:0;}
+.form-hdr-label{font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;}
+.form-hdr-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--dark);}
+.photo-tap{border:2px dashed var(--border);border-radius:10px;padding:28px 16px;text-align:center;cursor:pointer;color:var(--muted);font-size:13px;background:var(--cream);}
+.photo-tap-icon{font-size:24px;margin-bottom:4px;}
+.nw-info{background:var(--gold-bg);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--mid);margin:6px 0 2px;border:1px solid var(--gold-border);}
+
+/* LOOKUP */
+.lookup-card{background:#fff;border-radius:14px;padding:16px;border:1px solid var(--border);}
+
+/* CUSTOMER VIEW */
+#customer-view{display:none;position:fixed;inset:0;background:#fff;z-index:500;overflow-y:auto;flex-direction:column;}
+#customer-view.open{display:flex;}
+.cv-top{background:#fff;border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;}
+.cv-back{width:32px;height:32px;border-radius:50%;background:var(--gold-bg);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:var(--gold2);}
+.cv-body{padding:16px;}
+.cv-img{width:100%;max-height:250px;object-fit:cover;border-radius:14px;margin-bottom:16px;border:1px solid var(--border);}
+
+/* NOTIFICATION */
+.notif{position:fixed;top:68px;left:50%;transform:translateX(-50%) translateY(-16px);background:var(--dark);color:#fff;padding:9px 20px;border-radius:100px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;}
+.notif.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.notif.err{background:var(--red);}
+.notif.ok{background:var(--green);}
+
+/* OWNER SWITCH MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:800;display:none;align-items:flex-end;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal-box{background:#fff;border-radius:20px 20px 0 0;padding:28px 24px;width:100%;max-width:480px;}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--dark);margin-bottom:6px;}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:18px;}
+
+/* MISC */
+.flex-between{display:flex;justify-content:space-between;align-items:center;}
+.mt8{margin-top:8px;}
+.mt12{margin-top:12px;}
+.mt16{margin-top:16px;}
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);}
+.empty-icon{font-size:40px;margin-bottom:10px;opacity:.4;}
+.access-denied{text-align:center;padding:60px 24px;}
+.denied-icon{font-size:48px;margin-bottom:14px;}
+.denied-title{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--dark);margin-bottom:8px;}
+.denied-text{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:24px;}
+.gold-sep{height:1px;background:linear-gradient(90deg,transparent,var(--gold-border),transparent);margin:14px 0;}
+.pm-btn{flex:1;background:#fff;border:1.5px solid var(--border);border-radius:9px;padding:8px 4px;font-size:11px;font-weight:600;cursor:pointer;color:var(--mid);font-family:'DM Sans',sans-serif;text-align:center;transition:all .15s;}
+.pm-btn.active{background:var(--dark);color:#fff;border-color:var(--dark);}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;margin-bottom:12px;}
+.chips::-webkit-scrollbar{display:none;}
+.chip{background:#fff;border:1.5px solid var(--border);border-radius:20px;padding:5px 14px;font-size:11px;cursor:pointer;white-space:nowrap;color:var(--mid);font-family:'DM Sans',sans-serif;flex-shrink:0;font-weight:500;}
+.chip.active{background:var(--dark);color:#fff;border-color:var(--dark);}
+.page-hdr{padding:16px 16px 0;}
+.page-hdr-label{font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:2px;}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:var(--dark);margin-bottom:12px;}
+.scr-pad{padding:0 16px 80px;}
+.fi{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;font-size:14px;outline:none;background:var(--cream2);font-family:'DM Sans',sans-serif;color:var(--dark);margin-bottom:8px;}
+.fi:focus{border-color:var(--gold2);}
+.fl{font-size:10px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;font-weight:600;display:block;margin-bottom:4px;margin-top:10px;}
+.btn-gold{width:100%;background:linear-gradient(135deg,#9A7B0A,#C9A84C);color:#fff;border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:.5px;margin-bottom:8px;}
+.btn-whatsapp{width:100%;background:#25D366;color:#fff;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:8px;}
+.btn-outline{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--dark);}
+.btn-danger{background:#fff;border:1.5px solid #FECACA;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--red);}
+.inv-item{background:#fff;border-radius:14px;padding:14px;border:1px solid var(--border);margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;box-shadow:var(--shadow);}
+.inv-photo{width:64px;height:64px;object-fit:cover;border-radius:10px;flex-shrink:0;border:1px solid var(--border);}
+.inv-no-photo{width:64px;height:64px;border-radius:10px;flex-shrink:0;background:var(--gold-bg);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-size:22px;}
+.inv-body{flex:1;min-width:0;}
+.inv-tag{font-size:11px;color:var(--gold2);font-weight:700;letter-spacing:.5px;}
+.inv-name{font-size:14px;font-weight:600;color:var(--dark);margin:2px 0;}
+.inv-meta{font-size:11px;color:var(--muted);}
+.inv-price{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:700;color:var(--gold2);flex-shrink:0;text-align:right;}
+.ac-wrap{position:relative;}
+.ac-drop{position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--gold-border);border-radius:12px;z-index:200;max-height:260px;overflow-y:auto;display:none;box-shadow:var(--shadow2);}
+.ac-drop.open{display:block;}
+.ac-item{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;border-bottom:1px solid var(--border);}
+.ac-item:last-child{border-bottom:none;}
+.ac-item:hover,.ac-item:active{background:var(--gold-bg);}
+.ac-thumb{width:36px;height:36px;object-fit:cover;border-radius:6px;flex-shrink:0;}
+.ac-tag{font-size:12px;font-weight:700;color:var(--gold2);flex-shrink:0;}
+.ac-name{font-size:12px;color:var(--dark);}
+.nw-info{background:var(--gold-bg);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--mid);margin:6px 0 2px;border:1px solid var(--gold-border);}
+
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading">
+  <div class="load-ring"></div>
+  <div class="load-name">Gayatri Jewellers</div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-logo">✦</div>
+  <div class="login-brand">Gayatri Jewellers</div>
+  <div class="login-sub">PURITY · ELEGANCE · TRUST</div>
+  <div class="login-card">
+    <span class="lbl">Enter Access Code</span>
+    <input class="linput" type="password" id="pass-input" placeholder="••••••••" autocomplete="off"/>
+    <div class="lerr" id="err-text"></div>
+    <button class="lbtn" onclick="doLogin()">ENTER</button>
+  </div>
+</div>
+
+<!-- SWITCH TO OWNER MODAL -->
+<div class="modal-bg" id="owner-modal">
+  <div class="modal-box">
+    <div class="modal-title">Switch to Owner Mode</div>
+    <div class="modal-sub">Enter the owner password to unlock owner features.</div>
+    <span class="lbl">Owner Password</span>
+    <input class="linput" style="font-size:16px;letter-spacing:4px;" type="password" id="owner-modal-pass" placeholder="••••••••" autocomplete="off"/>
+    <div class="lerr" id="owner-modal-err"></div>
+    <button class="lbtn" style="margin-top:12px;" onclick="submitOwnerSwitch()">CONFIRM</button>
+    <button onclick="closeOwnerModal()" style="width:100%;background:none;border:none;margin-top:10px;font-size:13px;color:var(--muted);cursor:pointer;padding:6px;">Cancel</button>
+  </div>
+</div>
+
+<!-- PURE GOLD MODAL -->
+<div class="modal-bg" id="pure-gold-modal">
+  <div class="modal-box">
+    <div class="modal-title">🪙 Add Pure 24K Gold to Bill</div>
+    <div class="modal-sub">Customer is buying pure 24K gold. Polish % is added to weight for billing.</div>
+    <span class="lbl">WEIGHT (grams)</span>
+    <input class="linput" style="font-size:18px;letter-spacing:2px;" type="number" step="0.001" id="pg-weight" placeholder="0.000"/>
+    <span class="lbl" style="margin-top:14px;">POLISH %</span>
+    <input class="linput" style="font-size:18px;letter-spacing:2px;" type="number" step="0.1" id="pg-polish" placeholder="2" value="2" oninput="calcPureGoldPreview()"/>
+    <div id="pg-preview" style="background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:10px;padding:12px 14px;margin-top:12px;display:none;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:4px;"><span>Net Weight</span><span id="pg-nw">—</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:4px;"><span>Polish Added</span><span id="pg-pw">—</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:4px;"><span>Billable Weight</span><span id="pg-bw">—</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:700;color:var(--gold2);border-top:1px solid var(--gold-border);padding-top:8px;margin-top:4px;"><span>Total Amount</span><span id="pg-total">—</span></div>
+    </div>
+    <div class="lerr" id="pg-err"></div>
+    <button class="lbtn" style="margin-top:12px;" onclick="confirmAddPureGold()">ADD TO BILL</button>
+    <button onclick="document.getElementById('pure-gold-modal').classList.remove('open')" style="width:100%;background:none;border:none;margin-top:10px;font-size:13px;color:var(--muted);cursor:pointer;padding:6px;">Cancel</button>
+  </div>
+</div>
+
+<!-- APP SHELL -->
+<div id="app-shell">
+  <div class="top-bar">
+    <div>
+      <div class="tb-brand-name">Gayatri Jewellers</div>
+      <div class="tb-brand-sub">PURITY · ELEGANCE · TRUST</div>
+      <div class="tb-date" id="tb-date"></div>
+    </div>
+    <div class="tb-right">
+      <button id="mode-badge" onclick="onModeBadgeClick()"></button>
+      <button class="exit-btn2" onclick="doLogout()">Exit</button>
+    </div>
+  </div>
+
+  <div class="main-scroll" id="main-scroll">
+    <!-- HOME -->
+    <div class="screen active" id="screen-home">
+      <div class="home-pad" id="home-content"></div>
+    </div>
+    <!-- LOOKUP -->
+    <div class="screen" id="screen-lookup">
+      <div class="page-hdr">
+        <div class="page-hdr-label">Search</div>
+        <div class="page-title">Tag Lookup</div>
+      </div>
+      <div class="scr-pad">
+        <div class="ac-wrap">
+          <input class="fi" id="lookup-input" placeholder="Type tag e.g. RGS-01-12…" oninput="lookupAC()" autocomplete="off"/>
+          <div class="ac-drop" id="lookup-drop"></div>
+        </div>
+        <div id="lookup-result" class="mt12"></div>
+      </div>
+    </div>
+    <!-- BILL -->
+    <div class="screen" id="screen-bill">
+      <div id="bill-content"></div>
+    </div>
+    <!-- INVENTORY -->
+    <div class="screen" id="screen-inventory">
+      <div id="inventory-content"></div>
+    </div>
+    <!-- REPORTS -->
+    <div class="screen" id="screen-reports">
+      <div class="page-hdr">
+        <div class="page-hdr-label">PURITY · ELEGANCE · TRUST</div>
+        <div class="page-title">Reports</div>
+      </div>
+      <div class="scr-pad" id="reports-content"></div>
+    </div>
+    <!-- ADD/EDIT -->
+    <div class="screen" id="screen-add-item">
+      <div id="add-item-content"></div>
+    </div>
+    <!-- SALES HISTORY (owner) -->
+    <div class="screen" id="screen-sales">
+      <div id="sales-content"></div>
+    </div>
+    <!-- SETTINGS (owner) -->
+    <div class="screen" id="screen-settings">
+      <div id="settings-content"></div>
+    </div>
+  </div>
+
+  <div class="bottom-nav" id="bottom-nav"></div>
+</div>
+
+<!-- CUSTOMER PRICE BREAKDOWN -->
+<div id="customer-view">
+  <div class="cv-top">
+    <button class="cv-back" onclick="closeCustomerView()">←</button>
+    <div>
+      <div style="font-size:12px;color:var(--gold2);font-weight:600;" id="cv-tag"></div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;color:var(--dark);" id="cv-name"></div>
+    </div>
+  </div>
+  <div class="cv-body" id="cv-body"></div>
+</div>
+
+<!-- MORE DRAWER -->
+<div class="more-overlay" id="more-overlay" onclick="closeMoreSheet()"></div>
+<div class="more-sheet" id="more-sheet" style="display:none;">
+  <div class="more-sheet-handle"></div>
+  <div class="more-sheet-title">More Options</div>
+  <div class="more-grid" id="more-grid"></div>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notif" id="notif"></div>
+
+<script>
+// ══ CONSTANTS ══
+const CATS=["Ring","Tops","Bali","Necklace","Chain","Bracelet","Bangle","Pendant","Mangalsutra","Anklet","Nosering","Set","Other"];
+const TYPES=["22kt Plain","22kt Stone","18kt Diamond","14kt Diamond"];
+const TYPE_LABELS={"22kt Plain":"Plain Gold","22kt Stone":"Stone Gold","18kt Diamond":"18K Diamond","14kt Diamond":"14K Diamond"};
+const PURITY_LABELS={"22kt Plain":"22 Karat Gold","22kt Stone":"22 Karat Gold","18kt Diamond":"18 Karat Gold","14kt Diamond":"14 Karat Gold"};
+const PERIODS=["daily","weekly","monthly","quarterly","yearly"];
+const PERIOD_LABELS={"daily":"Daily","weekly":"Weekly","monthly":"Monthly","quarterly":"Quarterly","yearly":"Yearly"};
+const CAT_ICONS={Ring:"💍",Tops:"✨",Bali:"🔔",Necklace:"📿",Chain:"⛓",Bracelet:"🔗",Bangle:"🔄",Pendant:"🏅",Mangalsutra:"🟤",Anklet:"🦶",Nosering:"⭕",Set:"👑",Other:"✦"};
+// Default passwords — overridden by Firebase gj_settings
+let OWNER_PASS="GJISKING001";
+let STAFF_PASS="GJ888826"; // legacy single staff password
+
+// ══ STATE ══
+let mode=null;
+let loggedInStaffName=''; // set when a named staff logs in
+let currentScreen="home";
+let inventory={},rates={gold24:0,silver:0},sales={},appSettings={};
+let gjSettings={ownerPass:'GJISKING001',staffPass:'GJ888826',staffAccounts:[]}; // loaded from Firebase
+let editingKey=null,billingCart=[],discountPct=0,reportPeriod="daily",billDone=null;
+let invSearch='',firebaseOk=false;
+let _bc='',_bp='',_bstaff='';
+
+// ══ FIREBASE ══
+function initFirebase(){
+  if(!window._firebaseReady){document.addEventListener('firebase-ready',()=>{firebaseOk=true;listenData();});}
+  else{firebaseOk=true;listenData();}
+}
+function listenData(){
+  if(!window._db)return;
+  window._onValue(window._ref(window._db,'inventory'),s=>{
+    inventory=s.val()||{};
+    if(currentScreen==='home')renderHome();
+    if(currentScreen==='inventory')renderInventoryList();
+    if(currentScreen==='reports')renderReports();
+  });
+  window._onValue(window._ref(window._db,'rates'),s=>{
+    rates=s.val()||{gold24:0,silver:0};
+    if(currentScreen==='home')renderHome();
+    if(currentScreen==='inventory')renderInventoryList();
+    if(currentScreen==='reports')renderReports();
+  });
+  window._onValue(window._ref(window._db,'sales'),s=>{
+    sales=s.val()||{};
+    if(currentScreen==='reports')renderReports();
+    if(currentScreen==='home')renderHome();
+    if(currentScreen==='sales')renderSalesHistory();
+  });
+  window._onValue(window._ref(window._db,'acct_settings3'),s=>{
+    appSettings=s.val()||{};
+  });
+  // Load GJ app settings (passwords, staff accounts)
+  window._onValue(window._ref(window._db,'gj_settings'),s=>{
+    const v=s.val()||{};
+    gjSettings={
+      ownerPass:v.ownerPass||'GJISKING001',
+      staffPass:v.staffPass||'GJ888826',
+      staffAccounts:v.staffAccounts||[]
+    };
+    OWNER_PASS=gjSettings.ownerPass;
+    STAFF_PASS=gjSettings.staffPass;
+  });
+}
+function dbSet(p,v){return window._set(window._ref(window._db,p),v);}
+function dbPush(p,v){return window._push(window._ref(window._db,p),v);}
+function dbRemove(p){return window._remove(window._ref(window._db,p));}
+
+// ══ HELPERS ══
+function inr(n){return '₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2});}
+function calcRates(g24){return{r24:g24,r22:+(g24*.945).toFixed(2),r18:+(g24*.785).toFixed(2),r14:+(g24*.62).toFixed(2)};}
+function ctToG(ct){return +((ct||0)*.2).toFixed(4);}
+function calcNW(gw,dCt,sCt){return +(gw-ctToG(dCt)-ctToG(sCt)).toFixed(4);}
+
+// ── FIXED calcPrice: 22kt Stone polish & NW on net weight ──
+function calcPrice(item){
+  if(!rates.gold24)return null;
+  const r=calcRates(rates.gold24);
+  const gw=parseFloat(item.gw)||0;
+  const polish=parseFloat(item.polishPct)||0;
+  const mkPG=parseFloat(item.makingPG)||0;
+  const stChg=parseFloat(item.stoneChg)||0;
+  const dChg=parseFloat(item.diamondChg)||0;
+  const dCt=parseFloat(item.diamondCt)||0;
+  const sCt=parseFloat(item.stoneCt)||0;
+  let goldRate,baseW,nw;
+  if(item.type==="22kt Plain"){
+    goldRate=r.r22; nw=gw; baseW=gw;
+  } else if(item.type==="22kt Stone"){
+    goldRate=r.r22;
+    nw=Math.max(0,+(gw-sCt).toFixed(3)); // sCt is in GRAMS for 22kt Stone
+    baseW=nw; // polish on net weight
+  } else if(item.type==="18kt Diamond"){
+    goldRate=r.r18;
+    nw=Math.max(0,calcNW(gw,dCt,sCt));
+    baseW=nw;
+  } else {
+    goldRate=r.r14;
+    nw=Math.max(0,calcNW(gw,dCt,sCt));
+    baseW=nw;
+  }
+  const polishW=+(baseW*polish/100).toFixed(3);
+  const billW=+(baseW+polishW).toFixed(3);
+  const goldVal=+(billW*goldRate).toFixed(2);
+  const making=+(gw*mkPG).toFixed(2); // making always on gross weight
+  let stoneVal=0,diamVal=0;
+  if(item.type==="22kt Stone") stoneVal=+(sCt*stChg).toFixed(2); // sCt in grams
+  if(item.type==="18kt Diamond"||item.type==="14kt Diamond"){
+    diamVal=+(dCt*dChg).toFixed(2);
+    if(sCt>0) stoneVal=+(sCt*stChg).toFixed(2);
+  }
+  return{
+    goldVal,making,stoneVal,diamVal,
+    total:+(goldVal+making+stoneVal+diamVal).toFixed(2),
+    goldRate,billW,baseW,polishW,polishPct:polish,
+    gw,nw,dCt,sCt,dChg,stChg,mkPG
+  };
+}
+
+// ── Breakdown rows builder: making charges ALWAYS LAST ──
+function calcBreakdownRows(item,p){
+  const isSt=item.type==='22kt Stone';
+  const isDia=item.type==='18kt Diamond'||item.type==='14kt Diamond';
+  const karat=item.type.startsWith('22')?'22KT':item.type.startsWith('18')?'18KT':'14KT';
+  let rows=[];
+  // 1. Gold Rate
+  rows.push({label:`${karat} Gold Rate`,sub:'per gram',val:`${inr(p.goldRate)}/g`});
+  // 2. Gross Weight (always shown)
+  rows.push({label:'Gross Weight',sub:'',val:`${parseFloat(p.gw).toFixed(3)} g`});
+  // 3. For stone: stone weight then net weight
+  if(isSt && p.sCt>0){
+    rows.push({label:'Stone Weight',sub:'in grams',val:`${parseFloat(p.sCt).toFixed(3)} g`});
+    rows.push({label:'Net Weight',sub:'GW − Stone Weight',val:`${parseFloat(p.nw).toFixed(3)} g`});
+  }
+  // 3. For diamond: diamond wt, stone wt, net weight
+  if(isDia){
+    if(p.dCt>0) rows.push({label:'Diamond Weight',sub:`${p.dCt} ct`,val:`${ctToG(p.dCt).toFixed(3)} g`});
+    if(p.sCt>0) rows.push({label:'Stone Weight',sub:`${p.sCt} ct`,val:`${ctToG(p.sCt).toFixed(3)} g`});
+    rows.push({label:'Net Weight',sub:'GW − Diamond − Stone',val:`${parseFloat(p.nw).toFixed(3)} g`});
+  }
+  // 4. Polish on net weight
+  if(p.polishPct>0){
+    rows.push({label:`Polish (${p.polishPct}%)`,sub:`on Net Wt ${parseFloat(p.baseW).toFixed(3)}g`,val:`+ ${p.polishW.toFixed(3)} g`});
+    rows.push({label:'Billable Gold Weight',sub:'Net Wt + Polish',val:`${p.billW.toFixed(3)} g`});
+  }
+  // 5. Gold value
+  rows.push({label:'Gold Value',sub:`${p.billW.toFixed(3)}g × ${inr(p.goldRate)}/g`,val:inr(p.goldVal)});
+  // 6. Stone / diamond charges
+  if(isSt && p.stoneVal>0){
+    rows.push({label:'Stone Charges',sub:`${parseFloat(p.sCt).toFixed(3)}g × ${inr(p.stChg)}/g`,val:inr(p.stoneVal)});
+  }
+  if(isDia){
+    if(p.diamVal>0) rows.push({label:'Diamond Charges',sub:`${p.dCt}ct × ${inr(p.dChg)}/ct`,val:inr(p.diamVal)});
+    if(p.stoneVal>0) rows.push({label:'Stone Charges',sub:`${p.sCt}ct × ${inr(p.stChg)}/ct`,val:inr(p.stoneVal)});
+  }
+  // 7. Making Charges — ALWAYS LAST
+  if(p.making>0){
+    rows.push({label:'Making Charges',sub:`${p.gw}g × ${inr(p.mkPG)}/g`,val:inr(p.making)});
+  }
+  return rows;
+}
+
+function notify(msg,type='ok'){
+  const el=document.getElementById('notif');
+  el.textContent=msg; el.className='notif '+type;
+  el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2800);
+}
+
+// ══ AUTH ══
+document.getElementById('pass-input').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('owner-modal-pass').addEventListener('keydown',e=>{if(e.key==='Enter')submitOwnerSwitch();});
+
+function doLogin(){
+  const p=document.getElementById('pass-input').value.trim();
+  // 1. Owner password
+  if(p===gjSettings.ownerPass||p==='GJISKING001'){
+    mode='owner'; loggedInStaffName=''; startApp(); return;
+  }
+  // 2. Named staff accounts (custom passwords)
+  const namedStaff=(gjSettings.staffAccounts||[]).find(sa=>sa.pass===p&&sa.name);
+  if(namedStaff){
+    mode='staff'; loggedInStaffName=namedStaff.name; startApp(); return;
+  }
+  // 3. Legacy single staff password
+  if(p===gjSettings.staffPass||p==='GJ888826'){
+    mode='staff'; loggedInStaffName=''; startApp(); return;
+  }
+  document.getElementById('err-text').textContent='Incorrect password.';
+  document.getElementById('pass-input').value='';
+}
+function startApp(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app-shell').style.display='flex';
+  document.getElementById('tb-date').textContent=new Date().toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  // Auto-fill staff name for named logins
+  if(loggedInStaffName) _bstaff=loggedInStaffName;
+  updateModeBadge(); buildNav(); goScreen('home');
+}
+function doLogout(){
+  mode=null; loggedInStaffName='';
+  document.getElementById('app-shell').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('pass-input').value='';
+  document.getElementById('err-text').textContent='';
+  billingCart=[]; billDone=null; _bc=''; _bp=''; _bstaff=''; discountPct=0;
+}
+function updateModeBadge(){
+  const b=document.getElementById('mode-badge');
+  if(mode==='owner'){b.className='owner-badge';b.textContent='⦿ Owner';}
+  else{b.className='staff-badge';b.textContent='⦿ '+(loggedInStaffName||'Staff');}
+}
+
+// Badge click
+function onModeBadgeClick(){
+  if(mode==='owner'){
+    mode='staff'; updateModeBadge(); buildNav();
+    if(['inventory','reports','add-item'].includes(currentScreen))goScreen('home');
+    notify('Switched to Staff mode');
+  } else {
+    openOwnerModal();
+  }
+}
+function openOwnerModal(){
+  document.getElementById('owner-modal-pass').value='';
+  document.getElementById('owner-modal-err').textContent='';
+  document.getElementById('owner-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('owner-modal-pass').focus(),120);
+}
+function closeOwnerModal(){document.getElementById('owner-modal').classList.remove('open');}
+function submitOwnerSwitch(){
+  const p=document.getElementById('owner-modal-pass').value.trim();
+  if(p===gjSettings.ownerPass||p==='GJISKING001'){
+    closeOwnerModal(); mode='owner'; loggedInStaffName=''; updateModeBadge(); buildNav();
+    notify('Switched to Owner mode'); goScreen('home');
+  } else {
+    document.getElementById('owner-modal-err').textContent='Wrong owner password.';
+    document.getElementById('owner-modal-pass').value='';
+  }
+}
+
+// ══ NAV ══
+const NAV_ALL=[
+  {id:'home',   label:'Home',    icon:'🏠'},
+  {id:'bill',   label:'Bill',    icon:'🧾'},
+  {id:'lookup', label:'Lookup',  icon:'🔍'},
+  {id:'inventory',label:'Stock', icon:'📦', ow:true},
+  {id:'add-item',label:'Add',    icon:'➕', ow:true},
+  {id:'sales',  label:'Sales',   icon:'📋', ow:true},
+  {id:'reports',label:'Reports', icon:'📊', ow:true},
+  {id:'settings',label:'Settings',icon:'⚙️',ow:true},
+];
+
+function buildNav(){
+  const visible=NAV_ALL.filter(n=>!n.ow||mode==='owner');
+  // Primary: first 4 items always in bar
+  const primary=visible.slice(0,4);
+  // More: everything after index 3
+  const more=visible.slice(4);
+
+  const nav=document.getElementById('bottom-nav');
+  nav.innerHTML=primary.map(n=>`
+    <button class="nav-btn${currentScreen===n.id?' active':''}" id="nav-${n.id}"
+      onclick="${n.id==='add-item'?'goAddItem(null)':"goScreen('"+n.id+"')"}">
+      <span class="nav-icon">${n.icon}</span>
+      <span class="nav-label">${n.label}</span>
+    </button>`).join('');
+
+  // Always add More button if there are overflow items
+  if(more.length>0){
+    const moreActive=more.some(n=>n.id===currentScreen);
+    nav.innerHTML+=`
+      <button class="nav-btn${moreActive?' active':''}" id="nav-more" onclick="openMoreSheet()">
+        <span class="nav-icon">⋯</span>
+        <span class="nav-label">More</span>
+      </button>`;
+  }
+  _moreItems=more;
+}
+
+let _moreItems=[];
+function openMoreSheet(){
+  const grid=document.getElementById('more-grid');
+  grid.innerHTML=_moreItems.map(n=>`
+    <button class="more-item${currentScreen===n.id?' active':''}"
+      onclick="closeMoreSheet();${n.id==='add-item'?'goAddItem(null)':"goScreen('"+n.id+"')"}" >
+      <span class="more-item-icon">${n.icon}</span>
+      <span class="more-item-label">${n.label}</span>
+    </button>`).join('');
+  document.getElementById('more-overlay').classList.add('open');
+  const sheet=document.getElementById('more-sheet');
+  sheet.style.display='block';
+  sheet.style.transform='translateX(-50%) translateY(100%)';
+  requestAnimationFrame(()=>{
+    sheet.style.transition='transform .25s cubic-bezier(.32,.72,0,1)';
+    sheet.style.transform='translateX(-50%) translateY(0)';
+  });
+}
+function closeMoreSheet(){
+  const sheet=document.getElementById('more-sheet');
+  sheet.style.transform='translateX(-50%) translateY(100%)';
+  document.getElementById('more-overlay').classList.remove('open');
+  setTimeout(()=>{sheet.style.display='none';sheet.style.transition='';},260);
+}
+
+function goScreen(id){
+  if(id!=='sales'&&document.getElementById('sales-search-input')){
+    salesSearch='';
+    document.getElementById('sales-content').innerHTML='';
+  }
+  if(id!=='inventory'){
+    const ic=document.getElementById('inventory-content');
+    if(ic) ic.innerHTML='';
+    invSearch='';
+  }
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id)?.classList.add('active');
+  currentScreen=id;
+  buildNav(); // rebuild so primary & More active states are always correct
+  document.getElementById('main-scroll').scrollTop=0;
+  if(id==='home')renderHome();
+  if(id==='lookup'){
+    document.getElementById('lookup-input').value='';
+    document.getElementById('lookup-result').innerHTML='';
+    document.getElementById('lookup-drop').classList.remove('open');
+    setTimeout(()=>{applyTagKeydown('lookup-input');document.getElementById('lookup-input')?.focus();},80);
+  }
+  if(id==='bill'){
+    if(!discountPct&&rates.festivalDisc>0) discountPct=rates.festivalDisc;
+    renderBill();
+  }
+  if(id==='inventory'){if(mode!=='owner'){renderDenied('inventory-content');return;}renderInventoryList();}
+  if(id==='reports'){if(mode!=='owner'){renderDenied('reports-content');return;}renderReports();}
+  if(id==='sales'){if(mode!=='owner'){renderDenied('sales-content');return;}renderSalesHistory();}
+  if(id==='settings'){if(mode!=='owner'){renderDenied('settings-content');return;}renderSettings();}
+}
+function renderDenied(cid){
+  document.getElementById(cid).innerHTML=`<div class="access-denied"><div class="denied-icon">🔒</div><h3 class="denied-title">Owner Access Only</h3><p class="denied-text">Tap the Staff badge at the top and enter the owner password to access this section.</p><button class="btn-outline" onclick="goScreen('home')" style="margin-top:4px;">Go Home</button></div>`;
+}
+
+// ══ HOME ══
+function renderHome(){
+  let html='';
+  if(rates.gold24>0){
+    const r=calcRates(rates.gold24);
+    // Derived rate cards shown to everyone
+    html+=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+      <div class="rate-card" style="flex-direction:column;align-items:flex-start;gap:2px;">
+        <div class="rate-label">22KT GOLD</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--dark);">${inr(r.r22)}</div>
+        <div class="rate-sub">per gram</div>
+      </div>
+      <div class="rate-card" style="flex-direction:column;align-items:flex-start;gap:2px;">
+        <div class="rate-label">18KT GOLD</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--dark);">${inr(r.r18)}</div>
+        <div class="rate-sub">per gram</div>
+      </div>
+      <div class="rate-card" style="flex-direction:column;align-items:flex-start;gap:2px;">
+        <div class="rate-label">14KT GOLD</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--dark);">${inr(r.r14)}</div>
+        <div class="rate-sub">per gram</div>
+      </div>
+      <div class="rate-card" style="flex-direction:column;align-items:flex-start;gap:2px;">
+        <div class="rate-label">SILVER</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--dark);">${rates.silver>0?inr(rates.silver):'—'}</div>
+        <div class="rate-sub">per gram</div>
+      </div>
+    </div>`;
+  }
+  if(mode==='owner'){
+    html+=`
+    <div class="rate-card">
+      <div><div class="rate-label">24KT GOLD RATE</div><div class="rate-value">${rates.gold24>0?inr(rates.gold24):'—'}</div><div class="rate-sub">per gram · set here</div></div>
+      <input class="rate-input-box" type="number" id="h-g24" value="${rates.gold24||''}" placeholder="0" onchange="saveHomeRates()"/>
+    </div>
+    <div class="rate-card">
+      <div><div class="rate-label">SILVER RATE</div><div class="rate-value">${rates.silver>0?inr(rates.silver):'—'}</div><div class="rate-sub">per gram</div></div>
+      <input class="rate-input-box" type="number" id="h-silv" value="${rates.silver||''}" placeholder="0" onchange="saveHomeRates()"/>
+    </div>
+    <div class="rate-card" style="border:1.5px solid var(--gold-border);background:var(--gold-bg);">
+      <div>
+        <div class="rate-label" style="color:var(--gold2);">🎉 FESTIVAL DISCOUNT %</div>
+        <div class="rate-value" style="color:var(--gold2);">${rates.festivalDisc>0?rates.festivalDisc+'%':'OFF'}</div>
+        <div class="rate-sub">Auto-fills in every new bill</div>
+      </div>
+      <input class="rate-input-box" type="number" id="h-fest" value="${rates.festivalDisc||''}" placeholder="0" min="0" max="100" onchange="saveFestivalDisc()"/>
+    </div>`;
+  }
+  html+=`
+  <div class="find-card">
+    <div class="find-label">FIND BY TAG NUMBER</div>
+    <div class="find-row ac-wrap" style="position:relative;">
+      <input class="find-input" id="home-find" placeholder="Type tag e.g. RGS…" oninput="homeFindAC()" autocomplete="off"/>
+      <div class="ac-drop" id="home-find-drop"></div>
+      <button class="find-btn" onclick="homeFindGo()">FIND</button>
+    </div>
+  </div>`;
+  const acts=mode==='owner'?[
+    {ic:'➕',t:'Add Item',s:'Register new jewellery',fn:"goAddItem(null)"},
+    {ic:'📦',t:'Inventory',s:'Browse & search stock',fn:"goScreen('inventory')"},
+    {ic:'🧾',t:'Create Bill',s:'Invoice with discount',fn:"goScreen('bill')"},
+    {ic:'🔍',t:'Tag Lookup',s:'Find by tag number',fn:"goScreen('lookup')"},
+    {ic:'📊',t:'Reports',s:'Sales & stock report',fn:"goScreen('reports')"},
+  ]:[
+    {ic:'🧾',t:'Create Bill',s:'Invoice with discount',fn:"goScreen('bill')"},
+    {ic:'🔍',t:'Tag Lookup',s:'Find & add to bill',fn:"goScreen('lookup')"},
+  ];
+  html+=`<div class="quick-grid">${acts.map(a=>`<button class="qbtn" onclick="${a.fn}"><span class="qbtn-icon">${a.ic}</span><div class="qbtn-title">${a.t}</div><div class="qbtn-sub">${a.s}</div></button>`).join('')}</div>`;
+  document.getElementById('home-content').innerHTML=html;
+}
+function saveHomeRates(){
+  const g=parseFloat(document.getElementById('h-g24')?.value)||0;
+  const s=parseFloat(document.getElementById('h-silv')?.value)||0;
+  if(g>0)dbSet('rates',{gold24:g,silver:s,festivalDisc:rates.festivalDisc||0}).then(()=>notify('Rates updated!'));
+}
+function saveFestivalDisc(){
+  const d=Math.min(100,Math.max(0,parseFloat(document.getElementById('h-fest')?.value)||0));
+  dbSet('rates',{gold24:rates.gold24||0,silver:rates.silver||0,festivalDisc:d}).then(()=>{
+    rates.festivalDisc=d;
+    notify(d>0?'🎉 Festival discount set to '+d+'%':'Festival discount cleared');
+  });
+}
+function homeFindAC(){
+  applyTagKeydown('home-find');
+  const raw=document.getElementById('home-find')?.value||'';
+  const q=raw.trim().toLowerCase();
+  const drop=document.getElementById('home-find-drop');
+  if(!drop)return;
+  if(q.length<1){drop.classList.remove('open');return;}
+  const matches=Object.entries(inventory).filter(([k,i])=>(i.tag||'').toLowerCase().includes(q)).sort((a,b)=>(a[1].tag||'').localeCompare(b[1].tag||'',undefined,{numeric:true,sensitivity:'base'})).slice(0,8);
+  if(!matches.length){drop.classList.remove('open');return;}
+  drop.innerHTML=matches.map(([k,i])=>`<div class="ac-item" onclick="homeSelectItem('${k}')">${i.photo?`<img class="ac-thumb" src="${i.photo}" alt=""/>`:''}<span class="ac-tag">${i.tag}</span><span class="ac-name">${i.name}</span></div>`).join('');
+  drop.classList.add('open');
+}
+function homeFindGo(){
+  const q=(document.getElementById('home-find')?.value||'').trim();
+  if(!q)return;
+  const match=Object.entries(inventory).find(([k,i])=>i.tag.toLowerCase()===q.toLowerCase());
+  if(match)openCustomerView(match[0]);
+  else notify('Tag not found','err');
+}
+function homeSelectItem(key){
+  document.getElementById('home-find-drop')?.classList.remove('open');
+  openCustomerView(key);
+}
+
+// ══ TAG SEARCH HELPER — space key auto-converts to dash ══
+// e.g. typing "RGS 01 12" → becomes "RGS-01-12" instantly
+function tagKeydown(e){
+  if(e.key===' '||e.keyCode===32){
+    e.preventDefault();
+    const el=e.target;
+    const start=el.selectionStart, end=el.selectionEnd;
+    const val=el.value;
+    el.value=val.slice(0,start)+'-'+val.slice(end);
+    el.setSelectionRange(start+1,start+1);
+    // Trigger the input event so autocomplete fires
+    el.dispatchEvent(new Event('input',{bubbles:true}));
+  }
+}
+function applyTagKeydown(inputId){
+  const el=document.getElementById(inputId);
+  if(el&&!el._tagKD){el.addEventListener('keydown',tagKeydown);el._tagKD=true;}
+}
+
+function lookupAC(){
+  applyTagKeydown('lookup-input');
+  const q=document.getElementById('lookup-input').value.trim().toLowerCase();
+  const drop=document.getElementById('lookup-drop');
+  document.getElementById('lookup-result').innerHTML='';
+  if(q.length<1){drop.classList.remove('open');return;}
+  const matches=Object.entries(inventory).filter(([k,i])=>(i.tag||'').toLowerCase().includes(q)).sort((a,b)=>(a[1].tag||'').localeCompare(b[1].tag||'',undefined,{numeric:true,sensitivity:'base'})).slice(0,8);
+  if(!matches.length){drop.classList.remove('open');return;}
+  drop.innerHTML=matches.map(([k,i])=>`<div class="ac-item" onclick="selectLookupItem('${k}')">${i.photo?`<img class="ac-thumb" src="${i.photo}" alt=""/>`:''}<span class="ac-tag">${i.tag}</span><span class="ac-name">${i.name} · ${i.type}</span></div>`).join('');
+  drop.classList.add('open');
+}
+function selectLookupItem(key){
+  const item=inventory[key];
+  document.getElementById('lookup-input').value=item.tag;
+  document.getElementById('lookup-drop').classList.remove('open');
+  const p=calcPrice(item);
+  document.getElementById('lookup-result').innerHTML=`
+  <div class="lookup-card">
+    <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
+      ${item.photo?`<img style="width:80px;height:80px;object-fit:cover;border-radius:10px;border:1px solid var(--border);" src="${item.photo}" alt=""/>`:''}
+      <div style="flex:1;">
+        <div style="font-size:12px;color:var(--gold2);font-weight:600;">${item.tag}</div>
+        <div style="font-size:15px;font-weight:700;color:var(--dark);">${item.name}</div>
+        <div style="font-size:12px;color:var(--muted);">${item.category} · ${item.type}</div>
+        <div style="font-size:12px;color:var(--mid);">GW: ${item.gw}g${item.nw&&item.nw!=item.gw?` · NW: ${item.nw}g`:''}</div>
+        ${item.notes?`<div style="font-size:11px;color:var(--muted);margin-top:3px;font-style:italic;">${item.notes}</div>`:''}
+      </div>
+    </div>
+    ${p?`
+    <div style="background:var(--gold-bg);border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--gold-border);margin-bottom:10px;">
+      <span style="font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">Total Value</span>
+      <span style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--dark);">${inr(p.total)}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <button onclick="openCustomerView('${key}')" style="background:none;border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--dark);">🔍 Price Breakdown</button>
+      <button onclick="addToCartFromLookup('${key}')" style="background:linear-gradient(135deg,#9A7B0A,#C9A84C);border:none;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;color:#fff;">🧾 Add to Bill</button>
+    </div>
+    `:`<div style="background:var(--gold-bg);border-radius:8px;padding:12px;text-align:center;font-size:13px;color:var(--gold2);">Rates not set. Contact owner.</div>`}
+  </div>`;
+}
+
+function addToCartFromLookup(key){
+  const item=inventory[key];
+  if(!item){notify('Item not found','err');return;}
+  if(billingCart.some(i=>i.tag===item.tag)){notify('Already in bill','err');return;}
+  billingCart.push(item);
+  notify('Added to bill ✓');
+  goScreen('bill');
+}
+
+// ══ CUSTOMER VIEW (Price Breakdown) ══
+function openCustomerView(key){
+  const item=inventory[key]; if(!item)return;
+  const p=calcPrice(item); if(!p){notify('Rates not set','err');return;}
+  window._cvKey=key;
+  document.getElementById('cv-tag').textContent=item.tag;
+  document.getElementById('cv-name').textContent=item.name;
+  const karat=item.type.startsWith('22')?'22 Karat':item.type.startsWith('18')?'18 Karat':'14 Karat';
+  const rows=calcBreakdownRows(item,p);
+  const catIcon=CAT_ICONS[item.category]||'✦';
+  document.getElementById('cv-body').innerHTML=`
+    ${item.photo?`<img class="cv-img" src="${item.photo}" alt="${item.name}"/>`:'<div style="height:16px;"></div>'}
+    <div class="bd-wrap">
+      <div class="bd-header">
+        <div class="bd-cat-row"><div class="bd-cat-icon">${catIcon}</div><span class="bd-cat-name">${item.category.toUpperCase()}</span></div>
+        <span class="bd-karat">${karat}</span>
+      </div>
+      ${rows.map(r=>`<div class="bd-row"><div><div class="bd-label">${r.label}</div>${r.sub?`<div class="bd-sub">${r.sub}</div>`:''}</div><div class="bd-val">${r.val}</div></div>`).join('')}
+      <div class="bd-total"><div class="bd-total-label">TOTAL VALUE</div><div class="bd-total-val">${inr(p.total)}</div></div>
+    </div>
+    <button class="btn-gold" onclick="addToCartFromCV()" style="margin-bottom:10px;">🧾 Add to Bill</button>
+    <div style="text-align:center;padding:8px 16px 24px;font-size:11px;color:var(--muted);line-height:2;">
+      <strong style="font-family:'Cormorant Garamond',serif;font-size:13px;color:var(--gold2);">Gayatri Jewellers</strong><br/>
+      BIS Hallmarked · Certified Purity · Transparent Pricing
+    </div>`;
+  document.getElementById('customer-view').classList.add('open');
+  document.getElementById('customer-view').scrollTop=0;
+}
+function addToCartFromCV(){
+  if(window._cvKey)addToCartFromLookup(window._cvKey);
+  closeCustomerView();
+}
+function closeCustomerView(){document.getElementById('customer-view').classList.remove('open');}
+
+// ══ BILLING ══
+function renderBill(){
+  if(billDone){renderBillSuccess();return;}
+  // Don't re-render if a save is in progress - would reset the SAVING button
+  if(_billInProgress){
+    document.getElementById('bill-content').innerHTML=`
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:16px;">
+        <div style="width:48px;height:48px;border-radius:50%;border:3px solid var(--cream2);border-top-color:var(--gold2);animation:spin .9s linear infinite;"></div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--gold2);">Saving Sale to Database…</div>
+        <div style="font-size:12px;color:var(--muted);">Please wait — do not close this page</div>
+      </div>`;
+    return;
+  }
+  const today=new Date();
+  const dateStr=today.toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+  const getDiscBase=i=>{if(i._isPureGold) return 0;const p=calcPrice(i); if(!p) return 0;const isDia=i.type==='18kt Diamond'||i.type==='14kt Diamond';return isDia?(p.diamVal||0):(p.making+(p.polishW||0)*p.goldRate);};
+  const discBase=billingCart.reduce((a,i)=>a+getDiscBase(i),0);
+  const disc=Math.min(100,Math.max(0,discountPct||0));
+  const discAmt=+(discBase*disc/100).toFixed(2);
+  const cartTotal=billingCart.reduce((a,i)=>{
+    if(i._isPureGold)return a+(i._total||0);
+    const p=calcPrice(i);return a+(p?.total||0);
+  },0);
+  const grand=+(cartTotal-discAmt).toFixed(2);
+  const cartHTML=billingCart.length===0?
+    `<div class="bill-no-items">No items yet. Use Tag Lookup to find items and add to bill.</div>`:
+    billingCart.map((item,idx)=>{
+      const p=item._isPureGold?null:calcPrice(item);
+      const tot=item._isPureGold?item._total:(p?.total||0);
+      const meta=item._isPureGold?`24K-PURE · ${item.gw}g + ${item.polishPct}% polish = ${item._billW}g`:`${item.tag} · ${item.type} · GW:${item.gw}g`;
+      return `<div class="bill-item-row"><div><div class="bill-item-name">${item.name}</div><div class="bill-item-meta">${meta}</div></div><div style="display:flex;align-items:center;gap:8px;"><span class="bill-item-price">${inr(tot)}</span><button class="bill-item-del" onclick="removeFromCart(${idx})">×</button></div></div>`;
+    }).join('');
+  document.getElementById('bill-content').innerHTML=`
+    <div class="bill-header-box">
+      <div class="bill-header-brand">✦ Gayatri Jewellers</div>
+      <div class="bill-header-sub">PURITY · ELEGANCE · TRUST</div>
+      <div class="bill-header-date">${dateStr}</div>
+    </div>
+    <div style="padding:14px 14px 0;">
+      <div class="card" style="padding:14px;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;font-weight:600;">CUSTOMER & STAFF DETAILS</div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:10px;color:var(--muted);">Backdate?</span>
+            <label style="position:relative;display:inline-block;width:34px;height:18px;">
+              <input type="checkbox" id="backdate-toggle" onchange="toggleBackdate()" style="opacity:0;width:0;height:0;" ${_billBackdate?'checked':''}/>
+              <span style="position:absolute;cursor:pointer;inset:0;background:${_billBackdate?'var(--gold2)':'#ccc'};border-radius:18px;transition:.3s;" id="backdate-slider"></span>
+              <span style="position:absolute;content:'';height:12px;width:12px;left:${_billBackdate?'18px':'3px'};bottom:3px;background:white;border-radius:50%;transition:.3s;pointer-events:none;" id="backdate-thumb"></span>
+            </label>
+          </div>
+        </div>
+        <div id="backdate-row" style="display:${_billBackdate?'block':'none'};margin-bottom:10px;">
+          <div style="background:#FEF9E7;border:1.5px solid var(--gold-border);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;">
+            <span style="font-size:18px;">📅</span>
+            <div style="flex:1;">
+              <div style="font-size:10px;color:var(--gold2);font-weight:700;letter-spacing:1px;margin-bottom:4px;">SALE DATE (BACKDATING)</div>
+              <input type="date" id="bill-date" value="${_billDate||new Date().toISOString().split('T')[0]}" max="${new Date().toISOString().split('T')[0]}" oninput="saveBillFields()" style="width:100%;border:none;background:transparent;font-size:14px;font-weight:600;color:var(--dark);outline:none;font-family:'DM Sans',sans-serif;"/>
+            </div>
+          </div>
+          <div style="font-size:10px;color:var(--gold2);margin-top:4px;padding-left:4px;">⚠️ This sale will be recorded on the selected past date</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div><span class="fl" style="margin-top:0;">CUSTOMER NAME *</span><input class="fi" id="bill-cname" placeholder="Name" value="${_bc}" oninput="saveBillFields()"/></div>
+          <div><span class="fl" style="margin-top:0;">PHONE</span><input class="fi" id="bill-phone" placeholder="Phone" value="${_bp}" oninput="saveBillFields()"/></div>
+        </div>
+        <div><span class="fl" style="margin-top:10px;">STAFF NAME *</span><input class="fi" id="bill-staff" placeholder="Who is serving this customer?" value="${_bstaff}" oninput="saveBillFields()"/></div>
+        <div class="ac-wrap mt8">
+          <input class="fi" id="bill-search" placeholder="Search tag to add items…" oninput="billAC()" autocomplete="off" style="margin-bottom:0;"/>
+          <div class="ac-drop" id="bill-drop"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+          <button onclick="addPureGold24ToCart()" style="background:linear-gradient(135deg,#7D6608,#C9A84C);color:#fff;border:none;border-radius:9px;padding:9px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">🪙 Add Pure 24K Gold</button>
+          <button onclick="lookupExistingCustomer()" style="background:#fff;border:1.5px solid var(--gold-border);color:var(--gold2);border-radius:9px;padding:9px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">👤 Existing Customer</button>
+        </div>
+      </div>
+      <div style="margin-bottom:8px;">${cartHTML}</div>
+    </div>
+    <div class="disc-section">
+      <div class="disc-title">DISCOUNT${disc>0&&rates.festivalDisc>0&&disc===rates.festivalDisc?' 🎉 FESTIVAL OFFER':''}</div>
+      <div class="disc-pct-row"><span class="disc-pct-label">DISCOUNT %</span><input class="disc-pct-input" type="number" id="disc-input" placeholder="0 to 100" min="0" max="100" value="${disc||''}" oninput="discountPct=parseFloat(this.value)||0;saveBillFields();renderBill();"/></div>
+      <div class="disc-row">
+        <span style="font-size:12px;color:var(--muted);">${billingCart.some(i=>i.type==='18kt Diamond'||i.type==='14kt Diamond')?'Diamond charges (18K/14K)':'Making + Polish charges (22K)'}</span>
+        <span style="font-size:13px;font-weight:600;color:var(--dark);">${inr(discBase)}</span>
+      </div>
+      ${discAmt>0?`<div class="disc-row"><span class="disc-applied">🎉 Discount Applied (${disc}%) on ${billingCart.some(i=>i.type==='18kt Diamond'||i.type==='14kt Diamond')?'Diamond Charges':'Making & Polish'}</span><span style="color:var(--green);font-weight:700;">− ${inr(discAmt)}</span></div>
+      <div style="background:#FEF9E7;border:1px solid var(--gold-border);border-radius:8px;padding:7px 10px;margin-top:6px;font-size:11px;color:#7D6608;font-weight:600;">⚠️ Profit impact: Giving away ${inr(discAmt)} = ${cartTotal>0?(discAmt/cartTotal*100).toFixed(1):0}% of total bill</div>`:''}
+    </div>
+    <div class="grand-row"><span class="gt-label">GRAND TOTAL</span><span class="gt-val">${inr(grand)}</span></div>
+    <div style="padding:12px 14px 0;">
+      <div id="payment-section">
+        <div style="font-size:10px;color:var(--muted);letter-spacing:1.5px;font-weight:700;margin-bottom:9px;">PAYMENT METHOD</div>
+        <div style="display:flex;gap:6px;margin-bottom:10px;">
+          <button id="pm-cash-btn" class="pm-btn active" onclick="setPayMode('cash')">💵 Cash Only</button>
+          <button id="pm-old-btn" class="pm-btn" onclick="setPayMode('old_gold')">♻️ Old Gold + Cash</button>
+          <button id="pm-24k-btn" class="pm-btn" onclick="setPayMode('pure24')">🪙 24K Gold + Cash</button>
+        </div>
+        <div id="pm-old-fields" style="display:none;">
+          <div style="background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:10px;padding:11px 13px;margin-bottom:8px;">
+            <div style="font-size:10px;color:var(--gold2);font-weight:700;letter-spacing:1px;margin-bottom:8px;">OLD GOLD DETAILS</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:7px;">
+              <div><span style="font-size:10px;color:var(--muted);letter-spacing:1px;font-weight:700;display:block;margin-bottom:4px;">KARAT</span>
+                <select id="og-karat" onchange="calcOldGold()" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;outline:none;background:#fff;font-family:'DM Sans',sans-serif;">
+                  <option value="22">22K</option><option value="18">18K</option><option value="14">14K</option>
+                </select>
+              </div>
+              <div><span style="font-size:10px;color:var(--muted);letter-spacing:1px;font-weight:700;display:block;margin-bottom:4px;">WEIGHT (g)</span>
+                <input type="number" id="og-weight" placeholder="0.000" step="0.001" oninput="calcOldGold()" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;outline:none;background:#fff;font-family:'DM Sans',sans-serif;"/>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div><span style="font-size:10px;color:var(--muted);letter-spacing:1px;font-weight:700;display:block;margin-bottom:4px;">RATE (₹/g)</span>
+                <input type="number" id="og-rate" placeholder="₹/gram" oninput="calcOldGold()" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;outline:none;background:#fff;font-family:'DM Sans',sans-serif;"/>
+              </div>
+              <div><span style="font-size:10px;color:var(--muted);letter-spacing:1px;font-weight:700;display:block;margin-bottom:4px;">GOLD VALUE</span>
+                <div id="og-value" style="border:1.5px solid var(--gold-border);border-radius:8px;padding:8px 10px;font-size:14px;font-weight:700;color:var(--gold2);background:var(--gold-bg);">₹0</div>
+              </div>
+            </div>
+            <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid var(--gold-border);">
+              <span style="font-size:12px;font-weight:700;">Cash Balance:</span>
+              <span id="og-cash-bal" style="font-size:17px;font-weight:800;color:var(--green);">₹\${grand}</span>
+            </div>
+          </div>
+        </div>
+        <div id="pm-24k-fields" style="display:none;">
+          <div style="background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:10px;padding:11px 13px;margin-bottom:8px;">
+            <div style="font-size:10px;color:var(--gold2);font-weight:700;letter-spacing:1px;margin-bottom:8px;">24K GOLD PAYMENT DETAILS</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:7px;">
+              <div><span style="font-size:10px;color:var(--muted);letter-spacing:1px;font-weight:700;display:block;margin-bottom:4px;">24K WEIGHT (g)</span>
+                <input type="number" id="p24k-weight" placeholder="0.000" step="0.001" oninput="calc24kPayment(${grand})" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;outline:none;background:#fff;font-family:'DM Sans',sans-serif;"/>
+              </div>
+              <div><span style="font-size:10px;color:var(--muted);letter-spacing:1px;font-weight:700;display:block;margin-bottom:4px;">MY RATE (₹/g)</span>
+                <input type="number" id="p24k-rate" placeholder="₹/gram" oninput="calc24kPayment(${grand})" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;outline:none;background:#fff;font-family:'DM Sans',sans-serif;"/>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div><span style="font-size:10px;color:var(--muted);letter-spacing:1px;font-weight:700;display:block;margin-bottom:4px;">GOLD VALUE</span>
+                <div id="p24k-value" style="border:1.5px solid var(--gold-border);border-radius:8px;padding:8px 10px;font-size:14px;font-weight:700;color:var(--gold2);background:var(--gold-bg);">₹0</div>
+              </div>
+              <div><span style="font-size:10px;color:var(--muted);letter-spacing:1px;font-weight:700;display:block;margin-bottom:4px;">CASH BALANCE</span>
+                <div id="p24k-cash-bal" style="border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:14px;font-weight:700;color:var(--green);background:#fff;">₹\${grand}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:8px 14px 20px;">
+      <button class="btn-gold" onclick="completeBill()">COMPLETE SALE & GENERATE BILL</button>
+      <button class="btn-whatsapp" onclick="shareWhatsApp()">SHARE ON WHATSAPP</button>
+    </div>`;
+}
+
+function saveBillFields(){
+  _bc=document.getElementById('bill-cname')?.value||'';
+  _bp=document.getElementById('bill-phone')?.value||'';
+  _bstaff=document.getElementById('bill-staff')?.value||'';
+  _billDate=document.getElementById('bill-date')?.value||'';
+}
+function toggleBackdate(){
+  _billBackdate=document.getElementById('backdate-toggle')?.checked||false;
+  const row=document.getElementById('backdate-row');
+  const slider=document.getElementById('backdate-slider');
+  const thumb=document.getElementById('backdate-thumb');
+  if(row) row.style.display=_billBackdate?'block':'none';
+  if(slider) slider.style.background=_billBackdate?'var(--gold2)':'#ccc';
+  if(thumb) thumb.style.left=_billBackdate?'18px':'3px';
+  if(_billBackdate&&!_billDate) _billDate=new Date().toISOString().split('T')[0];
+}
+function billAC(){
+  saveBillFields();
+  applyTagKeydown('bill-search');
+  const q=document.getElementById('bill-search').value.trim().toLowerCase();
+  const drop=document.getElementById('bill-drop');
+  if(q.length<1){drop.classList.remove('open');return;}
+  const inCart=billingCart.map(i=>i.tag);
+  const matches=Object.entries(inventory)
+    .filter(([k,i])=>i.tag.toLowerCase().includes(q)&&!inCart.includes(i.tag))
+    .sort((a,b)=>a[1].tag.localeCompare(b[1].tag,undefined,{numeric:true,sensitivity:'base'}))
+    .slice(0,8);
+  if(!matches.length){drop.classList.remove('open');return;}
+  drop.innerHTML=matches.map(([k,i])=>`<div class="ac-item" onclick="addToCart('${k}')">${i.photo?`<img class="ac-thumb" src="${i.photo}" alt=""/>`:''}<span class="ac-tag">${i.tag}</span><span class="ac-name">${i.name} · ${i.gw}g</span></div>`).join('');
+  drop.classList.add('open');
+}
+function addToCart(key){
+  const searchEl=document.getElementById('bill-search');
+  const searchVal=searchEl?.value||'';
+  saveBillFields();
+  billingCart.push(inventory[key]);
+  renderBill();
+  // Restore search focus after re-render
+  setTimeout(()=>{
+    const el=document.getElementById('bill-search');
+    if(el){el.value='';el.focus();}
+  },50);
+}
+function removeFromCart(idx){saveBillFields();billingCart.splice(idx,1);renderBill();}
+
+
+// ── PAYMENT MODE ──
+let _payMode='cash';
+let _billBackdate=false;
+let _billDate='';
+function setPayMode(mode){
+  _payMode=mode;
+  ['cash','old_gold','pure24'].forEach(m=>{
+    const btn=document.getElementById('pm-'+m+'-btn')||document.getElementById('pm-'+m.replace('_gold','-old')+'-btn');
+  });
+  document.getElementById('pm-cash-btn')?.classList.toggle('active',mode==='cash');
+  document.getElementById('pm-old-btn')?.classList.toggle('active',mode==='old_gold');
+  document.getElementById('pm-24k-btn')?.classList.toggle('active',mode==='pure24');
+  document.getElementById('pm-old-fields').style.display=mode==='old_gold'?'block':'none';
+  document.getElementById('pm-24k-fields').style.display=mode==='pure24'?'block':'none';
+}
+function calcOldGold(){
+  const w=parseFloat(document.getElementById('og-weight')?.value)||0;
+  const r=parseFloat(document.getElementById('og-rate')?.value)||0;
+  const val=w*r;
+  const el=document.getElementById('og-value');
+  if(el)el.textContent='₹'+Math.round(val).toLocaleString('en-IN');
+  const getDiscBase=i=>{if(i._isPureGold) return 0;const p=calcPrice(i); if(!p) return 0;const isDia=i.type==='18kt Diamond'||i.type==='14kt Diamond';return isDia?(p.diamVal||0):(p.making+(p.polishW||0)*p.goldRate);};
+  const discBase=billingCart.reduce((a,i)=>a+getDiscBase(i),0);
+  const disc=Math.min(100,Math.max(0,discountPct||0));
+  const discAmt=+(discBase*disc/100).toFixed(2);
+  const cartTotal=billingCart.reduce((a,i)=>{if(i._isPureGold)return a+(i._total||0);const p=calcPrice(i);return a+(p?.total||0);},0);
+  const grand=+(cartTotal-discAmt).toFixed(2);
+  const cashBal=Math.max(0,grand-val);
+  const cb=document.getElementById('og-cash-bal');
+  if(cb)cb.textContent='₹'+Math.round(cashBal).toLocaleString('en-IN');
+}
+function calc24kPayment(grand){
+  const w=parseFloat(document.getElementById('p24k-weight')?.value)||0;
+  const r=parseFloat(document.getElementById('p24k-rate')?.value)||0;
+  const val=w*r;
+  const vEl=document.getElementById('p24k-value');
+  if(vEl)vEl.textContent='₹'+Math.round(val).toLocaleString('en-IN');
+  // Calculate from current cart if grand not supplied
+  if(!grand){
+    const getDiscBase=i=>{if(i._isPureGold) return 0;const p=calcPrice(i); if(!p) return 0;const isDia=i.type==='18kt Diamond'||i.type==='14kt Diamond';return isDia?(p.diamVal||0):(p.making+(p.polishW||0)*p.goldRate);};
+    const discBase=billingCart.reduce((a,i)=>a+getDiscBase(i),0);
+    const disc=Math.min(100,Math.max(0,discountPct||0));
+    const discAmt=+(discBase*disc/100).toFixed(2);
+    const cartTotal=billingCart.reduce((a,i)=>{const p=calcPrice(i);return a+(p?.total||0);},0);
+    grand=+(cartTotal-discAmt).toFixed(2);
+  }
+  const cashBal=Math.max(0,grand-val);
+  const cbEl=document.getElementById('p24k-cash-bal');
+  if(cbEl)cbEl.textContent='₹'+Math.round(cashBal).toLocaleString('en-IN');
+}
+
+// ── 24K PURE GOLD ITEM (modal) ──
+function addPureGold24ToCart(){
+  saveBillFields();
+  const goldRate=parseFloat(rates?.gold24)||0;
+  if(!goldRate){notify('Set 24K gold rate first','err');return;}
+  document.getElementById('pg-weight').value='';
+  document.getElementById('pg-polish').value='2';
+  document.getElementById('pg-preview').style.display='none';
+  document.getElementById('pg-err').textContent='';
+  document.getElementById('pure-gold-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('pg-weight').focus(),120);
+}
+function calcPureGoldPreview(){
+  const w=parseFloat(document.getElementById('pg-weight').value)||0;
+  const polish=parseFloat(document.getElementById('pg-polish').value)||2;
+  const goldRate=parseFloat(rates?.gold24)||0;
+  if(!w||!goldRate){document.getElementById('pg-preview').style.display='none';return;}
+  const polishW=+(w*polish/100).toFixed(3);
+  const billW=+(w+polishW).toFixed(3);
+  const total=+(billW*goldRate).toFixed(2);
+  document.getElementById('pg-nw').textContent=w.toFixed(3)+'g';
+  document.getElementById('pg-pw').textContent='+'+polishW.toFixed(3)+'g ('+polish+'%)';
+  document.getElementById('pg-bw').textContent=billW.toFixed(3)+'g';
+  document.getElementById('pg-total').textContent=inr(total);
+  document.getElementById('pg-preview').style.display='block';
+}
+// pg-weight event listener added in init
+function confirmAddPureGold(){
+  const weight=parseFloat(document.getElementById('pg-weight').value)||0;
+  const polish=parseFloat(document.getElementById('pg-polish').value)||2;
+  const goldRate=parseFloat(rates?.gold24)||0;
+  if(!weight||weight<=0){document.getElementById('pg-err').textContent='Enter valid weight';return;}
+  if(!goldRate){document.getElementById('pg-err').textContent='Set 24K gold rate first';return;}
+  const billW=+(weight*(1+polish/100)).toFixed(3);
+  const total=+(billW*goldRate).toFixed(2);
+  const goldItem={
+    tag:'24K-PURE',name:'Pure 24K Gold',category:'Gold',type:'24kt Pure',
+    gw:weight,nw:weight,polishPct:polish,
+    _isPureGold:true,_billW:billW,_total:total,
+    diamondCt:0,stoneCt:0,stoneChg:0,diamondChg:0,makingPG:0
+  };
+  billingCart.push(goldItem);
+  document.getElementById('pure-gold-modal').classList.remove('open');
+  renderBill();
+  notify(`24K gold added: ${weight}g + ${polish}% polish = ${billW}g × ${inr(goldRate)}/g = ${inr(total)}`);
+}
+
+// ── EXISTING CUSTOMER LOOKUP ──
+function lookupExistingCustomer(){
+  const q=(document.getElementById('bill-cname')?.value||'').trim();
+  const searchTerm=q.length>=2?q:prompt('Enter customer name or phone:');
+  if(!searchTerm||searchTerm.trim().length<2){notify('Enter at least 2 characters','err');return;}
+  const matches=Object.values(sales)
+    .filter(s=>s.customer?.toLowerCase().includes(searchTerm.toLowerCase())||s.phone?.includes(searchTerm))
+    .reduce((acc,s)=>{
+      const key=(s.phone||s.customer||'').trim();
+      if(!acc[key])acc[key]={name:s.customer,phone:s.phone||'',count:0,last:s.date,total:0};
+      acc[key].count++;acc[key].total+=parseFloat(s.total)||0;
+      if(s.date>acc[key].last)acc[key].last=s.date;
+      return acc;
+    },{});
+  const arr=Object.values(matches).sort((a,b)=>b.last.localeCompare(a.last));
+  if(!arr.length){notify('No customer found','err');return;}
+  if(arr.length===1){
+    fillCustomer(arr[0]); return;
+  }
+  // Multiple matches — pick first one (best match by recency)
+  if(arr.length>1){
+    const names=arr.slice(0,5).map(function(cu,i){return (i+1)+'. '+cu.name+' ('+(cu.phone||'no phone')+') - '+cu.count+' visits';}).join('\n');
+    const pick=prompt('Multiple found:\n'+names+'\n\nEnter number (1-'+Math.min(arr.length,5)+'):');
+    const idx=(parseInt(pick)||1)-1;
+    if(arr[Math.max(0,Math.min(idx,arr.length-1))])fillCustomer(arr[Math.max(0,Math.min(idx,arr.length-1))]);
+  } else {
+    fillCustomer(arr[0]);
+  }
+}
+function fillCustomer(c){
+  const billName=document.getElementById('bill-cname');
+  const billPhone=document.getElementById('bill-phone');
+  if(billName)billName.value=c.name||'';
+  if(billPhone)billPhone.value=c.phone||'';
+  saveBillFields();
+  notify('✓ '+c.name+' — '+c.count+' past sale'+(c.count!==1?'s':'')+', total '+inr(c.total));
+}
+
+
+// ══ SLACK NOTIFICATION ══
+function sendSaleSlack(bill){
+  const url=(appSettings.slackWebhook||'').trim();
+  if(!url||url.length<20)return;
+  const dateStr=new Date(bill.date).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  const itemLines=bill.items.map(it=>{
+    const isGold=it.tag==='24K-PURE';
+    return '  • '+(isGold?'24K Pure Gold ('+it.gw+'g)':it.name+' ['+it.tag+']')+' — ₹'+Math.round(it.total).toLocaleString('en-IN');
+  }).join('\n');
+  const payLine=bill.payment?.mode==='old_gold'
+    ?'♻️ Old Gold '+bill.payment.oldGoldWeight+'g + Cash ₹'+Math.round(bill.payment.cashPaid||0).toLocaleString('en-IN')
+    :bill.payment?.mode==='pure24'
+    ?'🪙 24K Gold '+bill.payment.gold24Weight+'g + Cash ₹'+Math.round(bill.payment.cashPaid||0).toLocaleString('en-IN')
+    :'💵 Cash';
+  const msg='🧾 *NEW SALE — Gayatri Jewellers*\n'
+    +'📅 '+dateStr+'\n'
+    +'👤 *'+bill.customer+(bill.phone?' ('+bill.phone+')':'')+'*\n'
+    +'👨‍💼 Staff: '+bill.staff+'\n'
+    +'\n*Items Sold:*\n'+itemLines
+    +(bill.discAmt>0?'\n  💸 Discount: −₹'+Math.round(bill.discAmt).toLocaleString('en-IN'):'')
+    +'\n\n💰 *TOTAL: ₹'+Math.round(bill.total).toLocaleString('en-IN')+'*'
+    +'\n💳 Payment: '+payLine;
+  try{
+    fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:msg})});
+  }catch(e){}
+}
+
+let _billInProgress=false;
+function completeBill(){
+  if(_billInProgress){notify('Please wait…','err');return;}
+  saveBillFields();
+  const name=_bc.trim();
+  const phone=_bp.trim();
+  const staff=_bstaff.trim();
+  if(!name){notify('Enter customer name','err');return;}
+  if(!staff){notify('Enter staff name','err');return;}
+  if(!billingCart.length){notify('Add at least one item','err');return;}
+  _billInProgress=true;
+  // Show saving state by re-rendering (renderBill checks _billInProgress)
+  renderBill();
+  const getDiscBase=i=>{if(i._isPureGold) return 0;const p=calcPrice(i); if(!p) return 0;const isDia=i.type==='18kt Diamond'||i.type==='14kt Diamond';return isDia?(p.diamVal||0):(p.making+(p.polishW||0)*p.goldRate);};
+  const discBase=billingCart.reduce((a,i)=>a+getDiscBase(i),0);
+  const disc=Math.min(100,Math.max(0,discountPct||0));
+  const discAmt=+(discBase*disc/100).toFixed(2);
+  const cartTotal=billingCart.reduce((a,i)=>{
+    const tot=i._isPureGold?i._total:(calcPrice(i)?.total||0);
+    return a+tot;
+  },0);
+  const grand=+(cartTotal-discAmt).toFixed(2);
+
+  // Build payment info
+  let payInfo={mode:_payMode,cashPaid:grand};
+  if(_payMode==='old_gold'){
+    const ogW=parseFloat(document.getElementById('og-weight')?.value)||0;
+    const ogR=parseFloat(document.getElementById('og-rate')?.value)||0;
+    const ogK=document.getElementById('og-karat')?.value||'22';
+    const ogVal=+(ogW*ogR).toFixed(2);
+    payInfo={mode:'old_gold',oldGoldWeight:ogW,oldGoldKarat:ogK,oldGoldRate:ogR,oldGoldValue:ogVal,cashPaid:Math.max(0,+(grand-ogVal).toFixed(2))};
+  } else if(_payMode==='pure24'){
+    const p24W=parseFloat(document.getElementById('p24k-weight')?.value)||0;
+    const p24R=parseFloat(document.getElementById('p24k-rate')?.value)||0;
+    const p24Val=+(p24W*p24R).toFixed(2);
+    payInfo={mode:'pure24',gold24Weight:p24W,gold24Rate:p24R,gold24Value:p24Val,cashPaid:Math.max(0,+(grand-p24Val).toFixed(2))};
+  }
+
+  const billItems=billingCart.map(i=>{
+    if(i._isPureGold){return{tag:'24K-PURE',name:'Pure 24K Gold',category:'Gold',type:'24kt Pure',gw:i.gw,nw:i.nw,polishPct:i.polishPct,total:i._total,billW:i._billW,goldVal:i._total,making:0,stoneVal:0,diamVal:0,diamondCt:0,stoneCt:0};}
+    const p=calcPrice(i);
+    return{tag:i.tag,name:i.name,category:i.category||'',type:i.type||'',
+      gw:i.gw,nw:i.nw||i.gw,diamondCt:i.diamondCt||0,stoneCt:i.stoneCt||0,
+      polishPct:i.polishPct||0,makingPG:i.makingPG||0,
+      stoneChg:i.stoneChg||0,diamondChg:i.diamondChg||0,
+      goldVal:p?.goldVal||0,making:p?.making||0,
+      stoneVal:p?.stoneVal||0,diamVal:p?.diamVal||0,total:p?.total||0};
+  });
+
+  // making = actual making charges total (for records)
+  const mkTotal=billingCart.reduce((a,i)=>{if(i._isPureGold)return a;const p=calcPrice(i);return a+(p?.making||0);},0);
+  const bill={
+    date:(_billBackdate&&_billDate&&_billDate!==new Date().toISOString().split('T')[0])?new Date(_billDate+'T12:00:00').toISOString():new Date().toISOString(),
+    customer:name,phone,staff,
+    items:billItems,making:mkTotal,discPct:disc,discAmt,total:grand,
+    payment:payInfo,
+    _backdated:(_billBackdate&&_billDate&&_billDate!==new Date().toISOString().split('T')[0])?true:undefined
+  };
+  const soldKeys=Object.entries(inventory)
+    .filter(([k,i])=>billingCart.some(ci=>!ci._isPureGold&&ci.tag===i.tag))
+    .map(([k])=>k);
+  const hasPureGold=billingCart.some(i=>i._isPureGold);
+  const pureGoldItem=billingCart.find(i=>i._isPureGold);
+
+  // Safety timeout — release lock after 12 seconds if Firebase hangs
+  const _saveTimeout=setTimeout(()=>{
+    if(_billInProgress){
+      _billInProgress=false;
+      notify('Save timed out — check connection and try again','err');
+      renderBill();
+    }
+  },12000);
+
+  dbPush('sales',bill).then(saleRef=>{
+    clearTimeout(_saveTimeout);
+    const billDateStr=bill.date.split('T')[0];
+    const saleKey=saleRef?.key||'';
+
+    // ── SALE IS NOW CONFIRMED SAVED IN FIREBASE ──
+    // Show success screen immediately — sale record is safe
+    billDone={...bill,payment:payInfo};
+    sendSaleSlack(bill);
+    billingCart=[];_bc='';_bp='';_bstaff='';discountPct=0;_payMode='cash';_billBackdate=false;_billDate='';
+    _billInProgress=false;
+    notify('✅ Sale saved!');
+    renderBillSuccess();
+    // auto-refill festival discount for next bill
+    if(rates.festivalDisc>0) discountPct=rates.festivalDisc;
+
+    // ── BACKGROUND: remove sold items from inventory + log entries ──
+    // ONE single Firebase call deletes all sold items simultaneously (not 10 separate round trips)
+    if(soldKeys.length>0){
+      const deletions={};
+      soldKeys.forEach(k=>{ deletions['inventory/'+k]=null; });
+      window._update(window._ref(window._db),deletions).catch(()=>{});
+    }
+    if(hasPureGold&&pureGoldItem){
+      window._push(window._ref(window._db,'pure_gold_sales'),{
+        date:billDateStr,customer:name,phone,
+        weight:pureGoldItem.gw,billW:pureGoldItem._billW,
+        rate:parseFloat(rates?.gold24)||0,
+        total:pureGoldItem._total,saleKey
+      }).catch(()=>{});
+    }
+    if(_payMode==='pure24'&&payInfo.gold24Weight>0){
+      window._push(window._ref(window._db,'customer_gold_receipts'),{
+        date:billDateStr,customer:name,phone,
+        weight:payInfo.gold24Weight,rate:payInfo.gold24Rate,value:payInfo.gold24Value,
+        saleTotal:grand
+      }).catch(()=>{});
+    }
+  }).catch(e=>{
+    clearTimeout(_saveTimeout);
+    console.error(e);_billInProgress=false;
+    notify('Error saving — check connection','err');
+    renderBill();
+  });
+}
+
+function renderBillSuccess(){
+  if(!billDone)return;
+  const billNo='GJ'+new Date(billDone.date).getTime().toString().slice(-7);
+  const dateStr=new Date(billDone.date).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+  const timeStr=new Date(billDone.date).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+
+  let itemsHTML='';
+  billDone.items.forEach(it=>{
+    // Reconstruct item to get breakdown rows
+    const fakeItem={
+      type:it.type,gw:it.gw,nw:it.nw,
+      diamondCt:it.diamondCt,stoneCt:it.stoneCt,
+      polishPct:it.polishPct,makingPG:it.makingPG,
+      stoneChg:it.stoneChg,diamondChg:it.diamondChg
+    };
+    const p=calcPrice(fakeItem);
+    const rows=p?calcBreakdownRows(fakeItem,p):[];
+    itemsHTML+=`
+      <div style="background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid var(--border);box-shadow:var(--shadow);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;padding-bottom:8px;border-bottom:1.5px solid var(--gold-border);">
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--dark);">${it.name}</div>
+            <div style="font-size:11px;color:var(--gold2);font-weight:600;margin-top:2px;">${it.tag} · ${it.category||''} · ${it.type||''}</div>
+          </div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--gold2);">${inr(it.total)}</div>
+        </div>
+        ${rows.map(r=>`
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;border-bottom:1px solid #f5f0e4;">
+            <div>
+              <div style="font-size:12px;color:var(--dark);">${r.label}</div>
+              ${r.sub?`<div style="font-size:10px;color:var(--muted);">${r.sub}</div>`:''}
+            </div>
+            <div style="font-size:12px;color:var(--dark);font-weight:500;text-align:right;">${r.val}</div>
+          </div>`).join('')}
+        <div style="display:flex;justify-content:space-between;padding:8px 0 0;font-size:13px;font-weight:700;color:var(--gold2);">
+          <span>ITEM TOTAL</span><span>${inr(it.total)}</span>
+        </div>
+      </div>`;
+  });
+
+  document.getElementById('bill-content').innerHTML=`
+    <div style="padding:0 0 30px;">
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#9A7B0A,#C9A84C);padding:24px 20px;text-align:center;">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:#fff;letter-spacing:1px;">✦ Gayatri Jewellers</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.8);letter-spacing:3px;margin-top:4px;">PURITY · ELEGANCE · TRUST</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.65);margin-top:5px;">BIS Hallmarked · Certified Pure Gold</div>
+      </div>
+
+      <!-- Bill Meta -->
+      <div style="background:var(--cream);padding:14px 16px;border-bottom:1px solid var(--border);">
+        <!-- Saved confirmation banner -->
+        <div style="background:#D5F5E3;border:1px solid #A9DFBF;border-radius:10px;padding:9px 14px;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+          <span style="font-size:18px;">✅</span>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#1E8449;">Sale Saved to Database</div>
+            <div style="font-size:10px;color:#1E8449;opacity:.8;">Bill No: ${billNo} · ${timeStr}</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">
+          <div>
+            <div style="font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px;">BILL NO</div>
+            <div style="font-weight:700;color:var(--dark);font-size:13px;">${billNo}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px;">DATE</div>
+            <div style="font-weight:600;color:var(--dark);">${dateStr}</div>
+            <div style="font-size:11px;color:var(--muted);">${timeStr}</div>
+            ${billDone._backdated?`<div style="font-size:9px;background:#FEF9E7;color:var(--gold2);border:1px solid var(--gold-border);border-radius:10px;padding:2px 7px;margin-top:3px;display:inline-block;font-weight:700;">📅 BACKDATED</div>`:''}
+          </div>
+          <div>
+            <div style="font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px;">CUSTOMER</div>
+            <div style="font-weight:700;color:var(--dark);">${billDone.customer}</div>
+            ${billDone.phone?`<div style="font-size:11px;color:var(--muted);">${billDone.phone}</div>`:''}
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px;">SERVED BY</div>
+            <div style="font-weight:700;color:var(--dark);">${billDone.staff||'—'}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gold Rate at time of sale -->
+      <div style="background:#fff;padding:10px 16px;border-bottom:1px solid var(--border);font-size:11px;color:var(--muted);">
+        24KT Gold Rate: <strong style="color:var(--dark);">${inr(rates.gold24)}/g</strong> &nbsp;|&nbsp; 22KT: <strong style="color:var(--dark);">${inr(+(rates.gold24*.945).toFixed(2))}/g</strong>
+      </div>
+
+      <!-- Items -->
+      <div style="padding:14px;">
+        <div style="font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;font-weight:600;margin-bottom:10px;">ITEMS & PRICE BREAKDOWN</div>
+        ${itemsHTML}
+      </div>
+
+      <!-- Totals -->
+      <div style="margin:0 14px 14px;background:#fff;border-radius:12px;border:1px solid var(--border);overflow:hidden;">
+        <div style="display:flex;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;">
+          <span style="color:var(--muted);">Subtotal</span>
+          <span style="font-weight:600;">${inr(billDone.items.reduce((a,i)=>a+i.total,0))}</span>
+        </div>
+        ${billDone.discAmt>0?`
+        <div style="display:flex;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;">
+          <span style="color:var(--green);">🎉 Festival Discount (${billDone.discPct}%) on ${billDone.items.some(i=>i.type==='18kt Diamond'||i.type==='14kt Diamond')?'Diamond Charges':'Making & Polish'}</span>
+          <span style="color:var(--green);font-weight:600;">− ${inr(billDone.discAmt)}</span>
+        </div>`:''}
+        <div style="display:flex;justify-content:space-between;padding:16px;background:linear-gradient(135deg,#9A7B0A,#C9A84C);">
+          <span style="font-size:11px;color:rgba(255,255,255,.8);letter-spacing:2px;text-transform:uppercase;font-weight:700;align-self:center;">GRAND TOTAL</span>
+          <span style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:#fff;">${inr(billDone.total)}</span>
+          ${billDone.payment&&billDone.payment.mode!=='cash'?`<div style="font-size:11px;color:rgba(255,255,255,.75);margin-top:5px;text-align:center;">
+            ${billDone.payment.mode==='old_gold'?
+              `♻️ Old Gold: ${billDone.payment.oldGoldWeight}g (${billDone.payment.oldGoldKarat}K) = ${inr(billDone.payment.oldGoldValue)} + Cash: ${inr(billDone.payment.cashPaid)}`:
+              `🪙 24K Gold: ${billDone.payment.gold24Weight}g = ${inr(billDone.payment.gold24Value)} + Cash: ${inr(billDone.payment.cashPaid)}`}
+          </div>`:''}
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div style="text-align:center;padding:6px 20px 8px;font-size:11px;color:var(--muted);line-height:2;">
+        Thank you for your purchase! 🙏<br/>
+        <strong style="color:var(--gold2);">Gayatri Jewellers</strong> — Exchange &amp; return as per store policy
+      </div>
+
+      <!-- Actions -->
+      <div style="padding:8px 14px 20px;">
+        <button class="btn-gold" onclick="billDone=null;discountPct=rates.festivalDisc>0?rates.festivalDisc:0;renderBill();">+ New Bill</button>
+        <button class="btn-whatsapp" onclick="shareWhatsAppBill();" style="margin-top:8px;">Share on WhatsApp</button>
+        <button onclick="printBill()" style="width:100%;background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--dark);margin-top:8px;">🖨️ Print Bill</button>
+      </div>
+    </div>`;
+}
+
+function shareWhatsApp(){
+  saveBillFields();
+  const name=_bc||'Customer';
+  const getDiscBase=i=>{if(i._isPureGold) return 0;const p=calcPrice(i); if(!p) return 0;const isDia=i.type==='18kt Diamond'||i.type==='14kt Diamond';return isDia?(p.diamVal||0):(p.making+(p.polishW||0)*p.goldRate);};
+  const discBase=billingCart.reduce((a,i)=>a+getDiscBase(i),0);
+  const disc=discountPct||0;
+  const discAmt=+(discBase*disc/100).toFixed(2);
+  const cartTotal=billingCart.reduce((a,i)=>{const p=calcPrice(i);return a+(p?.total||0);},0);
+  const grand=+(cartTotal-discAmt).toFixed(2);
+  let msg=`*✦ Gayatri Jewellers*\n_Purity · Elegance · Trust_\n\nDear ${name},\n\n`;
+  billingCart.forEach(i=>{const p=calcPrice(i);msg+=`• ${i.name} (${i.tag}) — ${inr(p?.total||0)}\n`;});
+  if(discAmt>0)msg+=`\nDiscount on Making: -${inr(discAmt)}`;
+  msg+=`\n*Grand Total: ${inr(grand)}*\n\nThank you for shopping with us! 🙏`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
+}
+function shareWhatsAppBill(){
+  if(!billDone)return;
+  const dateStr=new Date(billDone.date).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+  let msg=`*✦ Gayatri Jewellers*\n_Purity · Elegance · Trust_\n\n📋 *INVOICE*\nDate: ${dateStr}\nCustomer: *${billDone.customer}*${billDone.phone?' | '+billDone.phone:''}\nStaff: ${billDone.staff||'—'}\n\n*ITEMS PURCHASED:*\n`;
+  billDone.items.forEach((it,i)=>{
+    msg+=`\n${i+1}. *${it.name}* (${it.tag})\n   Type: ${it.type} | GW: ${it.gw}g\n   Gold: ${inr(it.goldVal)}${it.stoneVal>0?' | Stone: '+inr(it.stoneVal):''}${it.diamVal>0?' | Diamond: '+inr(it.diamVal):''}${it.making>0?' | Making: '+inr(it.making):''}\n   *Item Total: ${inr(it.total)}*\n`;
+  });
+  if(billDone.discAmt>0)msg+=`\nDiscount on Making (${billDone.discPct}%): -${inr(billDone.discAmt)}`;
+  msg+=`\n\n*GRAND TOTAL: ${inr(billDone.total)}*`;
+  msg+=`\n\nThank you for shopping with us! 🙏\n_Gayatri Jewellers — BIS Hallmarked Certified Gold_`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+// ══ INVENTORY ══
+
+let invCatFilter='All';
+function renderInventoryList(){
+  const CAT_ORDER=['Ring','Tops','Bali','Necklace','Chain','Bracelet','Bangle','Pendant','Mangalsutra','Anklet','Nosering','Set','Other','Gold'];
+  const catCounts={};
+  Object.values(inventory).forEach(i=>{const cat=i.category||'Other';catCounts[cat]=(catCounts[cat]||0)+1;});
+  const allItems=Object.entries(inventory);
+  const items=allItems.filter(([k,i])=>{
+    const ms=(i.tag||'').toLowerCase().includes((invSearch||'').toLowerCase())||(i.name||'').toLowerCase().includes((invSearch||'').toLowerCase());
+    const cf=invCatFilter==='All'||i.category===invCatFilter;
+    return ms&&cf;
+  }).sort((a,b)=>{
+    const ca=CAT_ORDER.indexOf(a[1].category||'Other'),cb=CAT_ORDER.indexOf(b[1].category||'Other');
+    if(ca!==cb)return ca-cb;
+    return (a[1].tag||'').localeCompare(b[1].tag||'',undefined,{numeric:true,sensitivity:'base'});
+  });
+  const usedCats=Object.entries(catCounts).sort((a,b)=>b[1]-a[1]).map(([cat])=>cat);
+  const chipHTML=['All',...usedCats].map(cat=>{
+    const cnt=cat==='All'?allItems.length:(catCounts[cat]||0);
+    return '<button class="chip'+(invCatFilter===cat?' active':'')+'" onclick="invCatFilter=\''+cat+'\';renderInventoryList()">'+(cat==='All'?'All \uD83D\uDCE6':((CAT_ICONS[cat]||'')+'\u00a0'+cat))+' <span style="opacity:.6;font-size:10px;">'+cnt+'</span></button>';
+  }).join('');
+  const itemsHTML=items.length===0
+    ?'<div class="empty-state"><div class="empty-icon">📦</div><p>No items found</p></div>'
+    :items.map(([k,item])=>{
+      const p=calcPrice(item);
+      const nameEsc=(item.name||'').replace(/'/g,"\\'");
+      return '<div class="inv-item">'
+        +(item.photo?'<img class="inv-photo" src="'+item.photo+'" alt=""/>'
+          :'<div class="inv-no-photo">'+(CAT_ICONS[item.category]||'✦')+'</div>')
+        +'<div class="inv-body">'
+        +'<div class="inv-tag">'+item.tag+'</div>'
+        +'<div class="inv-name">'+item.name+'</div>'
+        +'<div class="inv-meta">'+item.type+' · '+item.category+' · GW:'+item.gw+'g'+(item.nw&&item.nw!=item.gw?' NW:'+item.nw+'g':'')+'</div>'
+        +'<div style="display:flex;gap:8px;margin-top:8px;">'
+        +'<button class="btn-outline" style="flex:1;padding:7px 0;" onclick="goAddItem(\''+k+'\')">Edit</button>'
+        +'<button class="btn-danger" style="flex:1;padding:7px 0;" onclick="deleteItem(\''+k+'\',\''+nameEsc+'\')">Delete</button>'
+        +'</div></div>'
+        +(p?'<div class="inv-price">'+inr(p.total)+'</div>':'')
+        +'</div>';
+    }).join('');
+  const invEl=document.getElementById('inventory-content');
+  if(!invEl.querySelector('#inv-items-wrap')){
+    invEl.innerHTML=
+      '<div class="page-hdr"><div class="flex-between"><div><div class="page-hdr-label">OWNER</div><div class="page-title">Inventory</div></div>'
+      +'<button class="btn-gold" style="width:auto;padding:9px 18px;font-size:13px;" onclick="goAddItem(null)">+ Add</button></div></div>'
+      +'<div class="scr-pad">'
+      +'<input class="fi" id="inv-search-input" placeholder="Search by tag or name\u2026" oninput="invSearch=this.value;renderInventoryList()" autocomplete="off"/>'
+      +'<div class="chips mt8" id="inv-chips-wrap"></div>'
+      +'<div id="inv-count" style="font-size:12px;color:var(--muted);margin-bottom:10px;"></div>'
+      +'<div id="inv-items-wrap"></div>'
+      +'</div>';
+  }
+  const srch=document.getElementById('inv-search-input');
+  if(srch&&document.activeElement!==srch) srch.value=invSearch||'';
+  const ch=document.getElementById('inv-chips-wrap'); if(ch) ch.innerHTML=chipHTML;
+  const ct=document.getElementById('inv-count'); if(ct) ct.textContent=items.length+' item'+(items.length!==1?'s':'');
+  const iw=document.getElementById('inv-items-wrap'); if(iw) iw.innerHTML=itemsHTML;
+}
+function deleteItem(key,name){if(!confirm('Delete "'+name+'"?'))return;dbRemove('inventory/'+key).then(()=>notify('Deleted'));}
+
+// ══ ADD/EDIT ITEM ══
+function goAddItem(key){
+  if(mode!=='owner'){notify('Owner access required','err');return;}
+  editingKey=key;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-add-item').classList.add('active');
+  currentScreen='add-item';
+  buildNav();
+  document.getElementById('main-scroll').scrollTop=0;
+  renderAddForm(key?inventory[key]:null);
+}
+function renderAddForm(item){
+  const isEdit=!!item;
+  const t=item?.type||'22kt Plain';
+  const isDia=t==='18kt Diamond'||t==='14kt Diamond',isSt=t==='22kt Stone';
+  const gw=parseFloat(item?.gw)||0;
+  const dCt=parseFloat(item?.diamondCt)||0;
+  const sCt=parseFloat(item?.stoneCt)||0;
+  const stCt2=parseFloat(item?.stoneCt)||0; // for stone type
+  const nwDia=isDia?calcNW(gw,dCt,sCt):gw;
+  const nwSt=isSt?Math.max(0,+(gw-stCt2).toFixed(3)):gw;
+  document.getElementById('add-item-content').innerHTML=`
+    <div class="form-page-hdr">
+      <button class="back-circle" onclick="goScreen('inventory')">←</button>
+      <div><div class="form-hdr-label">${isEdit?'EDIT ITEM':'NEW ITEM'}</div><div class="form-hdr-title">${isEdit?'Edit Jewellery':'Add Jewellery'}</div></div>
+    </div>
+    <div class="scr-pad">
+      <div class="card">
+        <span class="fl" style="margin-top:0;">JEWELLERY TYPE *</span>
+        <select class="fi" id="ai-type" onchange="onTypeChange()">
+          ${TYPES.map(tp=>`<option value="${tp}"${item?.type===tp?' selected':''}>${TYPE_LABELS[tp]}</option>`).join('')}
+        </select>
+        <div class="fi-row">
+          <div><span class="fl">TAG NUMBER *</span><input class="fi" id="ai-tag" value="${item?.tag||''}" placeholder="RGS-01-12" oninput="this.value=this.value.toUpperCase()"/></div>
+          <div><span class="fl">CATEGORY</span><select class="fi" id="ai-cat">${CATS.map(c=>`<option${item?.category===c?' selected':''}>${c}</option>`).join('')}</select></div>
+        </div>
+        <span class="fl">ITEM NAME *</span>
+        <input class="fi" id="ai-name" value="${item?.name||''}" placeholder="e.g. RING"/>
+        <span class="fl">PURITY</span>
+        <select class="fi" id="ai-purity" onchange="onPurityChange()">
+          ${TYPES.map(tp=>`<option value="${tp}"${item?.type===tp?' selected':''}>${PURITY_LABELS[tp]}</option>`).join('')}
+        </select>
+        <div class="fi-row">
+          <div><span class="fl">GROSS WEIGHT (G) *</span><input class="fi" type="number" id="ai-gw" value="${item?.gw||''}" placeholder="2.145" oninput="onWeightChange()"/></div>
+          <div><span class="fl">POLISH %</span><input class="fi" type="number" id="ai-polish" value="${item?.polishPct??10}" placeholder="10"/></div>
+        </div>
+        <div id="ai-dia-fields" style="${isDia?'':'display:none;'}">
+          <div class="fi-row">
+            <div><span class="fl">DIAMOND WT (CT)</span><input class="fi" type="number" id="ai-dct" value="${item?.diamondCt||''}" placeholder="0.00" oninput="onWeightChange()"/></div>
+            <div><span class="fl">STONE WT (CT)</span><input class="fi" type="number" id="ai-sct" value="${item?.stoneCt||''}" placeholder="0.00" oninput="onWeightChange()"/></div>
+          </div>
+          <div class="nw-info">Net Weight: <strong id="ai-nw-val">${nwDia}g</strong> &nbsp;(GW − Diamond − Stone)</div>
+        </div>
+        <div id="ai-stone-fields" style="${isSt?'':'display:none;'}">
+          <span class="fl">STONE WEIGHT (G)</span>
+          <input class="fi" type="number" id="ai-sct2" value="${item?.stoneCt||''}" placeholder="0.00" oninput="onWeightChange()"/>
+          <div class="nw-info" id="ai-stone-nw-info">Net Weight: <strong id="ai-stone-nw-val">${nwSt}g</strong> &nbsp;(GW − Stone Wt · Polish on NW)</div>
+        </div>
+        <span class="fl">MAKING CHARGES (₹ PER GRAM OF GROSS WEIGHT)</span>
+        <input class="fi" type="number" id="ai-making" value="${item?.makingPG??240}" placeholder="240"/>
+        <div id="ai-stchg-wrap" style="${isSt?'':'display:none;'}">
+          <span class="fl">STONE CHARGES (₹/GRAM)</span>
+          <input class="fi" type="number" id="ai-stchg" value="${item?.stoneChg||0}"/>
+        </div>
+        <div id="ai-dia-chg-wrap" style="${isDia?'':'display:none;'}">
+          <span class="fl">DIAMOND CHARGES (₹/CARAT)</span>
+          <input class="fi" type="number" id="ai-dchg" value="${item?.diamondChg||0}"/>
+          <div id="ai-stchg2-wrap" style="${sCt>0?'':'display:none;'}">
+            <span class="fl">STONE CHARGES (₹/CARAT)</span>
+            <input class="fi" type="number" id="ai-stchg2" value="${item?.stoneChg||0}"/>
+          </div>
+        </div>
+        <span class="fl">PHOTO</span>
+        ${item?.photo?
+          `<img src="${item.photo}" id="ai-photo-preview" style="width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid var(--border);display:block;margin-bottom:8px;" onclick="document.getElementById('ai-file').click()"/>`:
+          `<div class="photo-tap" onclick="document.getElementById('ai-file').click()"><div class="photo-tap-icon">📷</div>Tap to add photo</div>
+           <img id="ai-photo-preview" style="width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid var(--border);display:none;margin-top:8px;"/>`}
+        <input type="file" accept="image/*" id="ai-file" style="display:none;" onchange="handlePhoto(event)"/>
+        <button class="btn-gold mt16" onclick="saveItem()" style="letter-spacing:1px;">${isEdit?'UPDATE ITEM':'SAVE TO INVENTORY'}</button>
+      </div>
+    </div>`;
+  window._photoData=item?.photo||null;
+}
+function onTypeChange(){const t=document.getElementById('ai-type').value;document.getElementById('ai-purity').value=t;toggleFields(t);}
+function onPurityChange(){const t=document.getElementById('ai-purity').value;document.getElementById('ai-type').value=t;toggleFields(t);}
+function toggleFields(t){
+  const isDia=t==='18kt Diamond'||t==='14kt Diamond',isSt=t==='22kt Stone';
+  document.getElementById('ai-dia-fields').style.display=isDia?'':'none';
+  document.getElementById('ai-stone-fields').style.display=isSt?'':'none';
+  document.getElementById('ai-stchg-wrap').style.display=isSt?'':'none';
+  document.getElementById('ai-dia-chg-wrap').style.display=isDia?'':'none';
+  onWeightChange();
+}
+function onWeightChange(){
+  const t=document.getElementById('ai-type')?.value;
+  const gw=parseFloat(document.getElementById('ai-gw')?.value)||0;
+  if(t==='18kt Diamond'||t==='14kt Diamond'){
+    const dCt=parseFloat(document.getElementById('ai-dct')?.value)||0;
+    const sCt=parseFloat(document.getElementById('ai-sct')?.value)||0;
+    const el=document.getElementById('ai-nw-val');
+    if(el)el.textContent=calcNW(gw,dCt,sCt)+'g';
+    const s2=document.getElementById('ai-stchg2-wrap');
+    if(s2)s2.style.display=sCt>0?'':'none';
+  }
+  if(t==='22kt Stone'){
+    const sCt=parseFloat(document.getElementById('ai-sct2')?.value)||0;
+    const nw=Math.max(0,+(gw-sCt).toFixed(3));
+    const el=document.getElementById('ai-stone-nw-val');
+    if(el)el.textContent=nw+'g';
+  }
+}
+function handlePhoto(e){
+  const f=e.target.files[0];if(!f)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      const c=document.createElement('canvas');
+      const MAX=1200;let w=img.width,h=img.height;
+      if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}
+      c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);
+      const d=c.toDataURL('image/jpeg',.92);
+      window._photoData=d;
+      const prev=document.getElementById('ai-photo-preview');
+      prev.src=d;prev.style.display='block';
+      const tap=document.querySelector('.photo-tap');if(tap)tap.style.display='none';
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(f);
+}
+function saveItem(){
+  const tag=document.getElementById('ai-tag').value.trim().toUpperCase();
+  const name=document.getElementById('ai-name').value.trim();
+  const gw=parseFloat(document.getElementById('ai-gw').value)||0;
+  if(!tag||!name||!gw){notify('Tag, Name & Weight required','err');return;}
+  // Duplicate tag check — skip if editing the same item
+  const duplicate=Object.entries(inventory).find(([k,i])=>i.tag.toUpperCase()===tag && k!==editingKey);
+  if(duplicate){notify('Tag "'+tag+'" already exists in inventory!','err');return;}
+  const type=document.getElementById('ai-type').value;
+  const isDia=type==='18kt Diamond'||type==='14kt Diamond',isSt=type==='22kt Stone';
+  const dCt=parseFloat(document.getElementById('ai-dct')?.value)||0;
+  const sCt=isDia?(parseFloat(document.getElementById('ai-sct')?.value)||0):(parseFloat(document.getElementById('ai-sct2')?.value)||0);
+  // Fix NW: for stone, nw = gw - stone weight
+  const nw=isDia?calcNW(gw,dCt,sCt):isSt?Math.max(0,+(gw-sCt).toFixed(3)):gw;
+  const item={
+    tag,name,gw,nw,type,
+    category:document.getElementById('ai-cat').value,
+    diamondCt:dCt,stoneCt:sCt,
+    polishPct:parseFloat(document.getElementById('ai-polish').value)||0,
+    makingPG:parseFloat(document.getElementById('ai-making').value)||0,
+    stoneChg:isSt?(parseFloat(document.getElementById('ai-stchg')?.value)||0):(isDia?(parseFloat(document.getElementById('ai-stchg2')?.value)||0):0),
+    diamondChg:isDia?(parseFloat(document.getElementById('ai-dchg')?.value)||0):0,
+    photo:window._photoData||'',notes:'',
+  };
+  dbSet((editingKey?'inventory/'+editingKey:'inventory/'+Date.now()),item).then(()=>{
+    notify(editingKey?'Item updated!':'Item saved!');editingKey=null;goScreen('inventory');
+  });
+}
+
+// ══ REPORTS ══
+function inPeriod(ds){
+  const d=new Date(ds),now=new Date();
+  if(reportPeriod==='daily')return d.toDateString()===now.toDateString();
+  if(reportPeriod==='weekly'){const df=(now-d)/864e5;return df>=0&&df<7;}
+  if(reportPeriod==='monthly')return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
+  if(reportPeriod==='quarterly'){
+    // FY quarters: Q1=Apr-Jun, Q2=Jul-Sep, Q3=Oct-Dec, Q4=Jan-Mar
+    const fyQ=m=>(m>=3&&m<=5)?1:(m>=6&&m<=8)?2:(m>=9&&m<=11)?3:4;
+    const fyYear=m=>m>=3?now.getFullYear():now.getFullYear()-1;
+    return fyQ(d.getMonth())===fyQ(now.getMonth())&&fyYear(d.getMonth())===fyYear(now.getMonth());
+  }
+  if(reportPeriod==='yearly'){
+    // Financial year: Apr 1 → Mar 31
+    const fyStart=now.getMonth()>=3?new Date(now.getFullYear(),3,1):new Date(now.getFullYear()-1,3,1);
+    const fyEnd=new Date(fyStart.getFullYear()+1,2,31,23,59,59);
+    return d>=fyStart&&d<=fyEnd;
+  }
+  return true;
+}
+
+function deleteSale(key){
+  const s=sales[key];
+  if(!s){notify('Sale not found','err');return;}
+  if(!confirm('Delete this sale?\n\n⚠️ All sold items will be restored to inventory.\nThis cannot be undone.'))return;
+  const promises=[dbRemove('sales/'+key)];
+  // Restore non-pure-gold items back to inventory
+  (s.items||[]).forEach(it=>{
+    if(!it.tag||it.tag==='24K-PURE')return;
+    const restoredItem={
+      tag:it.tag,name:it.name||'Item',category:it.category||'Other',
+      type:it.type||'22kt Plain',gw:it.gw,nw:it.nw||it.gw,
+      diamondCt:it.diamondCt||0,stoneCt:it.stoneCt||0,
+      polishPct:it.polishPct||0,makingPG:it.makingPG||0,
+      stoneChg:it.stoneChg||0,diamondChg:it.diamondChg||0
+    };
+    promises.push(dbPush('inventory',restoredItem));
+  });
+  Promise.all(promises).then(()=>notify('Sale deleted · items restored to stock ✓')).catch(()=>notify('Error deleting sale','err'));
+}
+
+function renderReports(){
+  if(mode!=='owner'){renderDenied('reports-content');return;}
+  const salesArr=Object.entries(sales); // keep [key, val] pairs
+  const salesVals=salesArr.map(([k,s])=>s);
+  const todayS=salesVals.filter(s=>new Date(s.date).toDateString()===new Date().toDateString());
+  const todayRev=todayS.reduce((a,s)=>a+(s.total||0),0);
+  const totalRev=salesVals.reduce((a,s)=>a+(s.total||0),0);
+  const items=Object.values(inventory);
+  const totalGw=items.reduce((a,i)=>a+(parseFloat(i.gw)||0),0);
+  const totalVal=items.reduce((a,i)=>a+(calcPrice(i)?.total||0),0);
+
+  // Category stats with value
+  const catMap={};
+  items.forEach(i=>{
+    if(!catMap[i.category])catMap[i.category]={p:0,g:0,v:0};
+    catMap[i.category].p++;
+    catMap[i.category].g+=parseFloat(i.gw)||0;
+    catMap[i.category].v+=calcPrice(i)?.total||0;
+  });
+
+  // Most sold categories
+  const soldCatMap={};
+  salesVals.forEach(s=>{(s.items||[]).forEach(it=>{
+    const cat=it.category||'Other';
+    if(!soldCatMap[cat])soldCatMap[cat]={count:0,rev:0};
+    soldCatMap[cat].count++;soldCatMap[cat].rev+=it.total||0;
+  });});
+
+  const perSArr=salesArr.filter(([k,s])=>inPeriod(s.date));
+  const perRev=perSArr.reduce((a,[k,s])=>a+(s.total||0),0);
+
+  document.getElementById('reports-content').innerHTML=`
+    <div class="reports-grid">
+      <div class="rstat"><div class="rstat-icon">🪙</div><div class="rstat-label">TOTAL SALES</div><div class="rstat-val">${inr(totalRev)}</div><div class="rstat-sub">All time · ${salesVals.length} bills</div></div>
+      <div class="rstat"><div class="rstat-icon">📅</div><div class="rstat-label">TODAY'S SALES</div><div class="rstat-val">${inr(todayRev)}</div><div class="rstat-sub">${todayS.length} bills today</div></div>
+      <div class="rstat"><div class="rstat-icon">📦</div><div class="rstat-label">CURRENT STOCK</div><div class="rstat-val">${items.length} pcs</div><div class="rstat-sub">${totalGw.toFixed(3)} g total</div></div>
+      <div class="rstat"><div class="rstat-icon">💎</div><div class="rstat-label">STOCK VALUE</div><div class="rstat-val">${inr(totalVal)}</div><div class="rstat-sub">At today's rates</div></div>
+    </div>
+    <div class="r-inv-bar">
+      <div class="r-inv-label">TOTAL INVENTORY VALUE</div>
+      <div class="r-inv-val">${inr(totalVal)}</div>
+      <div class="r-inv-sub">${items.length} pieces · ${totalGw.toFixed(3)}g · 24KT ${rates.gold24>0?inr(rates.gold24)+'/g':'—'}</div>
+    </div>
+
+    <div class="r-section-hdr"><span>📦</span> Stock by Category — Weight & Value</div>
+    ${Object.keys(catMap).length===0?'<div class="empty-state"><div class="empty-icon">📦</div><p>No inventory</p></div>':''}
+    ${Object.entries(catMap).sort((a,b)=>b[1].g-a[1].g).map(([cat,v])=>{
+      const pct=totalGw>0?(v.g/totalGw*100):0;
+      return `
+      <div class="r-cat-row" style="flex-direction:column;align-items:stretch;padding:12px 14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="r-cat-icon">${CAT_ICONS[cat]||'✦'}</div>
+            <div>
+              <div class="r-cat-name">${cat}</div>
+              <div class="r-cat-sub">${v.p} pc${v.p!==1?'s':''}</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--gold2);">${v.g.toFixed(3)}g</div>
+            <div style="font-size:10px;color:var(--muted);">${pct.toFixed(1)}% of stock</div>
+          </div>
+        </div>
+        <div style="background:var(--cream2);border-radius:4px;height:5px;margin-bottom:6px;">
+          <div style="background:linear-gradient(90deg,#9A7B0A,#C9A84C);height:5px;border-radius:4px;width:${Math.min(100,pct)}%;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);">
+          <span>💰 Value: <strong style="color:var(--dark);">${inr(v.v)}</strong></span>
+          <span>⚖️ Avg: <strong style="color:var(--dark);">${v.p>0?(v.g/v.p).toFixed(3):'—'}g/pc</strong></span>
+        </div>
+      </div>`}).join('')}
+    ${Object.keys(catMap).length>0?`
+    <div style="background:linear-gradient(135deg,#7D6608,#C9A84C);border-radius:12px;padding:13px 16px;margin:8px 0 12px;color:#fff;">
+      <div style="font-size:9px;letter-spacing:2px;opacity:.8;margin-bottom:6px;">⚖️ TOTAL STOCK WEIGHT</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div><div style="font-size:28px;font-weight:800;font-family:'Cormorant Garamond',serif;">${totalGw.toFixed(3)}g</div><div style="font-size:10px;opacity:.75;">${items.length} pieces · avg ${items.length>0?(totalGw/items.length).toFixed(3):'0'}g per piece</div></div>
+        <div style="text-align:right;"><div style="font-size:18px;font-weight:700;">${inr(totalVal)}</div><div style="font-size:10px;opacity:.75;">Total value at today's rate</div></div>
+      </div>
+    </div>`:''}
+
+    <div class="r-section-hdr"><span>🏆</span> Most Sold Categories</div>
+    ${Object.entries(soldCatMap).sort((a,b)=>b[1].count-a[1].count).slice(0,5).map(([cat,v])=>`
+      <div class="r-cat-row">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="r-cat-icon">${CAT_ICONS[cat]||'✦'}</div>
+          <div><div class="r-cat-name">${cat}</div><div class="r-cat-sub">${inr(v.rev)} revenue</div></div>
+        </div>
+        <div style="text-align:right;"><div class="r-cat-count">${v.count} sold</div></div>
+      </div>`).join('')}
+    ${Object.keys(soldCatMap).length===0?'<div style="text-align:center;padding:16px;color:var(--muted);font-size:13px;">No sales yet</div>':''}
+
+    <div class="r-section-hdr"><span>📋</span> Sales Log</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+      ${PERIODS.map(p=>`<button class="period-btn${reportPeriod===p?' active':''}" onclick="reportPeriod='${p}';renderReports();">${PERIOD_LABELS[p]}</button>`).join('')}
+    </div>
+    <div style="background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:12px;padding:12px 16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:13px;font-weight:600;">${PERIOD_LABELS[reportPeriod]} Revenue</span>
+      <span style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--gold2);">${inr(perRev)}</span>
+    </div>
+
+    ${perSArr.length===0?'<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">No sales in this period</div>':
+      perSArr.slice().reverse().map(([sKey,s])=>{
+        const dStr=new Date(s.date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+        const tStr=new Date(s.date).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+        return `
+        <div class="sale-card">
+          <div class="sale-card-header">
+            <div>
+              <div style="font-size:14px;font-weight:700;color:var(--dark);">${s.customer}${s.phone?' · '+s.phone:''}</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">${dStr} · ${tStr}</div>
+              ${s.staff?`<div style="font-size:11px;color:var(--gold2);font-weight:600;margin-top:1px;">Staff: ${s.staff}</div>`:''}
+            </div>
+            <div style="text-align:right;">
+              <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--gold2);">${inr(s.total)}</div>
+              <button onclick="deleteSale('${sKey}')" style="margin-top:5px;background:none;border:1px solid #FECACA;color:var(--red);border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;font-family:'DM Sans',sans-serif;">🗑 Delete</button>
+            </div>
+          </div>
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;font-weight:600;margin-bottom:6px;">${(s.items||[]).length} Item${(s.items||[]).length!==1?'s':''} Sold</div>
+          ${(s.items||[]).map(it=>`
+            <div class="sale-item-row">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:var(--dark);">${it.name}</div>
+                  <div style="font-size:11px;color:var(--gold2);font-weight:600;">${it.tag}${it.category?' · '+it.category:''}${it.type?' · '+it.type:''}</div>
+                  <div style="font-size:11px;color:var(--muted);">GW: ${it.gw}g${it.nw&&it.nw!=it.gw?' · NW: '+it.nw+'g':''}</div>
+                </div>
+                <div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:700;color:var(--gold2);">${inr(it.total)}</div>
+              </div>
+              ${it.goldVal?`<div class="sale-item-charges">Gold: ${inr(it.goldVal)}${it.stoneVal>0?' · Stone: '+inr(it.stoneVal):''}${it.diamVal>0?' · Diamond: '+inr(it.diamVal):''}${it.making>0?' · Making: '+inr(it.making):''}</div>`:''}
+            </div>`).join('')}
+          ${s.discAmt>0?`<div style="font-size:12px;color:var(--green);margin-top:6px;padding-top:6px;border-top:1px solid var(--border);">Discount on Making (${s.discPct}%): −${inr(s.discAmt)}</div>`:''}
+        </div>`;
+      }).join('')}
+  `;
+}
+
+
+// ══ SALES HISTORY (owner) ══
+let salesSearch='',salesPeriod='all';
+function renderSalesHistory(){
+  if(mode!=='owner'){renderDenied('sales-content');return;}
+  const allSales=Object.entries(sales).sort((a,b)=>b[1].date.localeCompare(a[1].date));
+  const q=(salesSearch||'').toLowerCase();
+  const now=new Date();
+  // Fiscal year: April 1 of current FY
+  const fyStart=now.getMonth()>=3?new Date(now.getFullYear(),3,1):new Date(now.getFullYear()-1,3,1);
+  const fyEnd=new Date(fyStart.getFullYear()+1,2,31,23,59,59);
+  const filtered=allSales.filter(([k,s])=>{
+    const matchQ=!q||(s.customer||'').toLowerCase().includes(q)||(s.phone||'').includes(q);
+    if(!matchQ)return false;
+    const sd=new Date(s.date);
+    if(salesPeriod==='today')return sd.toDateString()===now.toDateString();
+    if(salesPeriod==='week'){const df=(now-sd)/864e5;return df>=0&&df<7;}
+    if(salesPeriod==='month')return sd.getMonth()===now.getMonth()&&sd.getFullYear()===now.getFullYear();
+    if(salesPeriod==='fy')return sd>=fyStart&&sd<=fyEnd;
+    return true;
+  });
+  const totalRev=filtered.reduce((a,[,s])=>a+(s.total||0),0);
+  const fyLabel='FY '+fyStart.getFullYear()+'-'+String(fyStart.getFullYear()+1).slice(-2);
+  const periodLabels={all:'All Time',today:'Today',week:'This Week',month:'This Month',fy:fyLabel};
+  const periodBtns=['all','today','week','month','fy'].map(function(p){
+    return '<button class="chip'+(salesPeriod===p?' active':'')+'" onclick="salesPeriod=\''+p+'\';renderSalesHistoryCards()">'+periodLabels[p]+'</button>';
+  }).join('');
+  const cardsHTML=buildSalesCards(filtered);
+
+  // Only rebuild the full page if we haven't rendered the search bar yet
+  if(!document.getElementById('sales-search-input')){
+    document.getElementById('sales-content').innerHTML=
+      '<div class="page-hdr"><div class="page-hdr-label">OWNER</div><div class="page-title">Sales History</div></div>'
+      +'<div class="scr-pad">'
+      +'<input class="fi" id="sales-search-input" placeholder="Search customer name or phone…" oninput="salesSearch=this.value;renderSalesHistoryCards()" value="'+(salesSearch||'')+'"/>'
+      +'<div class="chips mt8" id="sales-period-chips">'+periodBtns+'</div>'
+      +'<div id="sales-summary-bar" style="background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:12px;padding:12px 16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">'
+      +'<span style="font-size:12px;color:var(--muted);" id="sales-count-lbl">'+filtered.length+' bill'+(filtered.length!==1?'s':'')+' found</span>'
+      +'<span style="font-family:Cormorant Garamond,serif;font-size:20px;font-weight:700;color:var(--gold2);" id="sales-total-lbl">'+inr(totalRev)+'</span>'
+      +'</div>'
+      +'<div id="sales-cards-list">'+cardsHTML+'</div>'
+      +'</div>';
+  } else {
+    renderSalesHistoryCards();
+  }
+}
+
+function renderSalesHistoryCards(){
+  const allSales=Object.entries(sales).sort((a,b)=>b[1].date.localeCompare(a[1].date));
+  const q=(salesSearch||'').toLowerCase();
+  const now=new Date();
+  const fyStart=now.getMonth()>=3?new Date(now.getFullYear(),3,1):new Date(now.getFullYear()-1,3,1);
+  const fyEnd=new Date(fyStart.getFullYear()+1,2,31,23,59,59);
+  const fyLabel='FY '+fyStart.getFullYear()+'-'+String(fyStart.getFullYear()+1).slice(-2);
+  const periodLabels={all:'All Time',today:'Today',week:'This Week',month:'This Month',fy:fyLabel};
+  const filtered=allSales.filter(([k,s])=>{
+    const matchQ=!q||(s.customer||'').toLowerCase().includes(q)||(s.phone||'').includes(q);
+    if(!matchQ)return false;
+    const sd=new Date(s.date);
+    if(salesPeriod==='today')return sd.toDateString()===now.toDateString();
+    if(salesPeriod==='week'){const df=(now-sd)/864e5;return df>=0&&df<7;}
+    if(salesPeriod==='month')return sd.getMonth()===now.getMonth()&&sd.getFullYear()===now.getFullYear();
+    if(salesPeriod==='fy')return sd>=fyStart&&sd<=fyEnd;
+    return true;
+  });
+  const totalRev=filtered.reduce((a,[,s])=>a+(s.total||0),0);
+  // Update chips
+  const chips=document.getElementById('sales-period-chips');
+  if(chips) chips.innerHTML=['all','today','week','month','fy'].map(function(p){
+    return '<button class="chip'+(salesPeriod===p?' active':'')+'" onclick="salesPeriod=\''+p+'\';renderSalesHistoryCards()">'+periodLabels[p]+'</button>';
+  }).join('');
+  // Update summary
+  const cl=document.getElementById('sales-count-lbl');
+  const tl=document.getElementById('sales-total-lbl');
+  if(cl) cl.textContent=filtered.length+' bill'+(filtered.length!==1?'s':'')+' found';
+  if(tl) tl.textContent=inr(totalRev);
+  // Update cards
+  const cardsList=document.getElementById('sales-cards-list');
+  if(cardsList) cardsList.innerHTML=buildSalesCards(filtered);
+  // Restore focus to search input (prevent keyboard dismiss)
+  const inp=document.getElementById('sales-search-input');
+  if(inp&&document.activeElement!==inp&&salesSearch){
+    const len=inp.value.length;
+    inp.focus();
+    try{inp.setSelectionRange(len,len);}catch(e){}
+  }
+}
+
+function buildSalesCards(filtered){
+  if(filtered.length===0) return '<div class="empty-state"><div class="empty-icon">🧾</div><p>No sales found</p></div>';
+  return filtered.map(([sKey,s])=>{
+    const dStr=new Date(s.date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+    const tStr=new Date(s.date).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    const payBadge=s.payment?.mode==='old_gold'?'♻️ Old Gold+Cash':s.payment?.mode==='pure24'?'🪙 24K Gold+Cash':'💵 Cash';
+    return '<div class="sale-card">'
+      +'<div class="sale-card-header">'
+      +'<div>'
+      +'<div style="font-size:14px;font-weight:700;color:var(--dark);">'+s.customer+(s.phone?' · '+s.phone:'')+'</div>'
+      +'<div style="font-size:11px;color:var(--muted);margin-top:2px;">'+dStr+' · '+tStr+'</div>'
+      +(s._backdated?'<div style="font-size:9px;background:#FEF9E7;color:var(--gold2);border:1px solid var(--gold-border);border-radius:10px;padding:2px 7px;margin-top:3px;display:inline-block;font-weight:700;">📅 BACKDATED</div>':'')
+      +(s.staff?'<div style="font-size:11px;color:var(--gold2);font-weight:600;margin-top:1px;">Staff: '+s.staff+'</div>':'')
+      +'<div style="font-size:10px;background:var(--cream2);display:inline-block;padding:2px 8px;border-radius:10px;margin-top:3px;">'+payBadge+'</div>'
+      +'</div>'
+      +'<div style="text-align:right;">'
+      +'<div style="font-family:Cormorant Garamond,serif;font-size:20px;font-weight:700;color:var(--gold2);">'+inr(s.total)+'</div>'
+      +(s.discAmt>0?'<div style="font-size:10px;color:var(--green);">-'+inr(s.discAmt)+' disc</div>':'')
+      +'<button class="btn-danger" style="padding:4px 10px;font-size:11px;margin-top:4px;" onclick="deleteSale(\''+sKey+'\')">🗑 Delete</button>'
+      +'</div>'
+      +'</div>'
+      +'<div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;font-weight:600;margin-bottom:6px;">'+(s.items||[]).length+' Item'+(((s.items||[]).length)!==1?'s':'')+' Sold</div>'
+      +(s.items||[]).map(it=>{
+        return '<div class="sale-item-row">'
+          +'<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
+          +'<div>'
+          +'<div style="font-size:13px;font-weight:600;color:var(--dark);">'+it.name+'</div>'
+          +'<div style="font-size:11px;color:var(--gold2);font-weight:600;">'+it.tag+(it.category?' · '+it.category:'')+(it.type?' · '+it.type:'')+'</div>'
+          +'<div style="font-size:11px;color:var(--muted);">GW: '+it.gw+'g'+(it.nw&&it.nw!=it.gw?' · NW: '+it.nw+'g':'')+'</div>'
+          +'</div>'
+          +'<div style="font-family:Cormorant Garamond,serif;font-size:16px;font-weight:700;color:var(--gold2);">'+inr(it.total)+'</div>'
+          +'</div>'
+          +(it.goldVal?'<div class="sale-item-charges">Gold: '+inr(it.goldVal)+(it.stoneVal>0?' · Stone: '+inr(it.stoneVal):'')+(it.diamVal>0?' · Diamond: '+inr(it.diamVal):'')+(it.making>0?' · Making: '+inr(it.making):'')+'</div>':'')
+          +'</div>';
+      }).join('')
+      +(s.payment?.mode==='old_gold'&&s.payment.oldGoldWeight?
+        '<div style="font-size:11px;color:var(--mid);margin-top:6px;padding:6px 8px;background:var(--gold-bg);border-radius:6px;">♻️ Old Gold: '+s.payment.oldGoldWeight+'g @ '+inr(s.payment.oldGoldRate||0)+'/g = '+inr(s.payment.oldGoldValue||0)+' | Cash: '+inr(s.payment.cashPaid||0)+'</div>':'')
+      +(s.payment?.mode==='pure24'&&s.payment.gold24Weight?
+        '<div style="font-size:11px;color:var(--mid);margin-top:6px;padding:6px 8px;background:var(--gold-bg);border-radius:6px;">🪙 24K Gold: '+s.payment.gold24Weight+'g @ '+inr(s.payment.gold24Rate||0)+'/g = '+inr(s.payment.gold24Value||0)+' | Cash: '+inr(s.payment.cashPaid||0)+'</div>':'')
+      +'</div>';
+  }).join('');
+}
+
+// ══ SETTINGS ══
+function renderSettings(){
+  if(mode!=='owner'){renderDenied('settings-content');return;}
+  const accs=gjSettings.staffAccounts||[];
+  document.getElementById('settings-content').innerHTML=`
+    <div class="page-hdr"><div class="page-hdr-label">OWNER</div><div class="page-title">Settings</div></div>
+    <div class="scr-pad">
+
+      <!-- ── CHANGE PASSWORDS ── -->
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:10px;color:var(--gold2);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;">🔑 Change Passwords</div>
+        <span class="fl" style="margin-top:0;">OWNER PASSWORD (current: hidden)</span>
+        <input class="fi" type="password" id="s-new-owner" placeholder="New owner password"/>
+        <span class="fl">CONFIRM OWNER PASSWORD</span>
+        <input class="fi" type="password" id="s-confirm-owner" placeholder="Confirm new password"/>
+        <div style="height:12px;"></div>
+        <span class="fl">LEGACY STAFF PASSWORD (single shared)</span>
+        <input class="fi" type="password" id="s-new-staff" placeholder="New staff password"/>
+        <div id="s-pass-err" style="font-size:12px;color:var(--red);min-height:16px;margin-bottom:4px;"></div>
+        <button class="btn-gold" style="margin-top:4px;" onclick="savePasswords()">💾 Save Passwords</button>
+      </div>
+
+      <!-- ── STAFF ACCOUNTS ── -->
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:10px;color:var(--gold2);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;">👤 Staff Accounts</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Each staff gets a unique password. When they login, their name auto-fills in every bill.</div>
+        ${accs.length===0?'<div style="text-align:center;padding:12px;font-size:13px;color:var(--muted);">No staff accounts yet</div>':''}
+        ${accs.map((sa,i)=>`
+          <div style="background:var(--cream2);border-radius:10px;padding:10px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--dark);">👤 ${sa.name}</div>
+              <div style="font-size:11px;color:var(--muted);">Password: ${'•'.repeat(sa.pass.length)}</div>
+            </div>
+            <button onclick="deleteStaffAccount(${i})" style="background:none;border:1px solid #FECACA;color:var(--red);border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;">🗑 Remove</button>
+          </div>`).join('')}
+        <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px;">
+          <div style="font-size:10px;color:var(--muted);font-weight:700;letter-spacing:1px;margin-bottom:8px;">ADD NEW STAFF</div>
+          <div class="fi-row">
+            <input class="fi" type="text" id="s-sa-name" placeholder="Staff name (e.g. Rahul)"/>
+            <input class="fi" type="text" id="s-sa-pass" placeholder="Their password"/>
+          </div>
+          <button class="btn-gold" style="margin-top:4px;" onclick="addStaffAccount()">➕ Add Staff Account</button>
+        </div>
+      </div>
+
+      <!-- ── ABOUT ── -->
+      <div style="text-align:center;padding:12px 0 24px;font-size:11px;color:var(--muted);">
+        Gayatri Jewellers · Owner Settings<br/>All changes save instantly to cloud ☁️
+      </div>
+    </div>`;
+}
+
+async function savePasswords(){
+  const newOwner=document.getElementById('s-new-owner').value.trim();
+  const confirmOwner=document.getElementById('s-confirm-owner').value.trim();
+  const newStaff=document.getElementById('s-new-staff').value.trim();
+  const errEl=document.getElementById('s-pass-err');
+  errEl.textContent='';
+  if(newOwner&&newOwner!==confirmOwner){errEl.textContent='Owner passwords do not match!';return;}
+  if(newOwner&&newOwner.length<4){errEl.textContent='Password must be at least 4 characters';return;}
+  if(newStaff&&newStaff.length<4){errEl.textContent='Staff password must be at least 4 characters';return;}
+  const updated={...gjSettings};
+  if(newOwner) updated.ownerPass=newOwner;
+  if(newStaff) updated.staffPass=newStaff;
+  await window._set(window._ref(window._db,'gj_settings'),updated);
+  document.getElementById('s-new-owner').value='';
+  document.getElementById('s-confirm-owner').value='';
+  document.getElementById('s-new-staff').value='';
+  notify('✅ Passwords saved!');
+}
+
+async function addStaffAccount(){
+  const name=document.getElementById('s-sa-name').value.trim();
+  const pass=document.getElementById('s-sa-pass').value.trim();
+  if(!name||!pass){notify('Enter staff name and password','err');return;}
+  if(pass.length<4){notify('Password must be 4+ characters','err');return;}
+  // Check for duplicate password
+  const existing=(gjSettings.staffAccounts||[]).find(sa=>sa.pass===pass||sa.name.toLowerCase()===name.toLowerCase());
+  if(existing){notify('Staff name or password already exists','err');return;}
+  const updated={...gjSettings,staffAccounts:[...(gjSettings.staffAccounts||[]),{name,pass}]};
+  await window._set(window._ref(window._db,'gj_settings'),updated);
+  document.getElementById('s-sa-name').value='';
+  document.getElementById('s-sa-pass').value='';
+  notify(`✅ ${name} added as staff`);
+}
+
+async function deleteStaffAccount(idx){
+  if(!confirm('Remove this staff account?'))return;
+  const accs=[...(gjSettings.staffAccounts||[])];
+  accs.splice(idx,1);
+  const updated={...gjSettings,staffAccounts:accs};
+  await window._set(window._ref(window._db,'gj_settings'),updated);
+  notify('Staff account removed');
+}
+
+// ══ PRINT BILL ══
+function printBill(){
+  if(!billDone)return;
+  const billNo='GJ'+new Date(billDone.date).getTime().toString().slice(-7);
+  const dateStr=new Date(billDone.date).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+  const timeStr=new Date(billDone.date).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  let itemsHTML='';
+  billDone.items.forEach(it=>{
+    const fakeItem={type:it.type,gw:it.gw,nw:it.nw,diamondCt:it.diamondCt,stoneCt:it.stoneCt,polishPct:it.polishPct,makingPG:it.makingPG,stoneChg:it.stoneChg,diamondChg:it.diamondChg};
+    const p=calcPrice(fakeItem);
+    const rows=p?calcBreakdownRows(fakeItem,p):[];
+    itemsHTML+=`<div style="border:1px solid #EDE6D0;border-radius:8px;padding:10px;margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid #EDE6D0;padding-bottom:6px;margin-bottom:6px;">
+        <div><strong>${it.name}</strong><div style="font-size:11px;color:#9C8E72;">${it.tag} · ${it.category||''} · ${it.type||''}</div></div>
+        <strong>₹${Number(it.total).toLocaleString('en-IN',{maximumFractionDigits:0})}</strong>
+      </div>
+      ${rows.map(r=>`<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0;"><span>${r.label}${r.sub?' ('+r.sub+')':''}</span><span>${r.val}</span></div>`).join('')}
+    </div>`;
+  });
+  const discLine=billDone.discAmt>0?`<div style="display:flex;justify-content:space-between;color:#1E8449;font-size:13px;padding:8px 0;border-bottom:1px solid #EDE6D0;"><span>🎉 Festival Discount (${billDone.discPct}%)</span><span>− ₹${Number(billDone.discAmt).toLocaleString('en-IN',{maximumFractionDigits:0})}</span></div>`:'';
+  const payLine=billDone.payment?.mode==='old_gold'?`♻️ Old Gold: ${billDone.payment.oldGoldWeight}g (${billDone.payment.oldGoldKarat}K) = ₹${Number(billDone.payment.oldGoldValue||0).toLocaleString('en-IN',{maximumFractionDigits:0})} + Cash: ₹${Number(billDone.payment.cashPaid||0).toLocaleString('en-IN',{maximumFractionDigits:0})}`
+    :billDone.payment?.mode==='pure24'?`🪙 24K Gold: ${billDone.payment.gold24Weight}g = ₹${Number(billDone.payment.gold24Value||0).toLocaleString('en-IN',{maximumFractionDigits:0})} + Cash: ₹${Number(billDone.payment.cashPaid||0).toLocaleString('en-IN',{maximumFractionDigits:0})}`
+    :'💵 Cash Payment';
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+  <style>
+    body{font-family:Arial,sans-serif;max-width:400px;margin:20px auto;padding:0 16px;font-size:13px;color:#1A1714;}
+    @media print{body{max-width:100%;margin:0;}@page{margin:8mm;}}
+    h1{font-family:Georgia,serif;font-size:22px;color:#B8960C;margin-bottom:2px;text-align:center;}
+    .sub{font-size:9px;letter-spacing:2px;color:#9C8E72;text-align:center;margin-bottom:2px;}
+    .divider{border:none;border-top:1px solid #EDE6D0;margin:10px 0;}
+    .meta{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;margin-bottom:10px;}
+    .meta-box{background:#FAF6E9;padding:7px 10px;border-radius:6px;}
+    .meta-label{font-size:9px;color:#9C8E72;letter-spacing:1px;text-transform:uppercase;}
+    .grand{background:linear-gradient(135deg,#9A7B0A,#C9A84C);color:#fff;padding:12px 16px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
+    .footer{text-align:center;font-size:10px;color:#9C8E72;margin-top:12px;}
+  </style></head><body>
+  <h1>✦ Gayatri Jewellers</h1>
+  <div class="sub">PURITY · ELEGANCE · TRUST</div>
+  <div class="sub">BIS Hallmarked · Certified Pure Gold</div>
+  <hr class="divider"/>
+  <div class="meta">
+    <div class="meta-box"><div class="meta-label">Bill No</div><strong>${billNo}</strong></div>
+    <div class="meta-box"><div class="meta-label">Date</div>${dateStr}</div>
+    <div class="meta-box"><div class="meta-label">Customer</div><strong>${billDone.customer}</strong>${billDone.phone?'<div style="font-size:11px;">'+billDone.phone+'</div>':''}</div>
+    <div class="meta-box"><div class="meta-label">Served By</div>${billDone.staff||'—'}</div>
+  </div>
+  <div style="font-size:10px;color:#9C8E72;margin-bottom:8px;">24KT: ₹${Number(rates.gold24).toLocaleString('en-IN')}/g · 22KT: ₹${Number(+(rates.gold24*0.945).toFixed(0)).toLocaleString('en-IN')}/g</div>
+  <hr class="divider"/>
+  <div style="font-size:10px;color:#9C8E72;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;">ITEMS & PRICE BREAKDOWN</div>
+  ${itemsHTML}
+  <hr class="divider"/>
+  ${discLine}
+  <div class="grand">
+    <span style="font-size:11px;letter-spacing:2px;text-transform:uppercase;opacity:.85;">GRAND TOTAL</span>
+    <strong style="font-size:22px;">₹${Number(billDone.total).toLocaleString('en-IN',{maximumFractionDigits:0})}</strong>
+  </div>
+  <div style="font-size:11px;color:#6B5A38;margin-top:8px;text-align:center;">${payLine}</div>
+  <div class="footer">Thank you for your purchase! 🙏<br/>Exchange &amp; return as per store policy<br/><strong>Gayatri Jewellers</strong></div>
+  </body></html>`;
+  const win=window.open('','_blank','width=480,height=700');
+  win.document.write(html);win.document.close();
+  setTimeout(()=>win.print(),400);
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  initFirebase();
+  document.getElementById('pg-weight')?.addEventListener('input',calcPureGoldPreview);
+  setTimeout(()=>{document.getElementById('loading').style.display='none';document.getElementById('login-screen').style.display='flex';},1100);
+});
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.ac-wrap')&&!e.target.closest('.find-row')){
+    document.querySelectorAll('.ac-drop').forEach(d=>d.classList.remove('open'));
+  }
+});
+document.getElementById('owner-modal').addEventListener('click',function(e){if(e.target===this)closeOwnerModal();});
+</script>
+</body>
+</html>
